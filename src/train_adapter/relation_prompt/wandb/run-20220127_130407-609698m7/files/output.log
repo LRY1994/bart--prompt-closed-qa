@@ -1,0 +1,76 @@
+Device: CUDA
+Number of GPUs: 1
+--------------------------------------------------------------------------------
++----+-----------------------------+--------------------------------------------------+
+|    | keys                        | values                                           |
+|----+-----------------------------+--------------------------------------------------|
+|  0 | epochs                      | 2                                                |
+|  1 | cuda                        | True                                             |
+|  2 | batch_size                  | 64                                               |
+|  3 | lr                          | 0.0001                                           |
+|  4 | seed                        |                                                  |
+|  5 | patience                    | 5                                                |
+|  6 | model                       | roberta-base                                     |
+|  7 | tokenizer                   | roberta-base                                     |
+|  8 | subset                      | 1.0                                              |
+|  9 | use_adapter                 | True                                             |
+| 10 | shuffle_rate                |                                                  |
+| 11 | cache_token_encodings       | False                                            |
+| 12 | non_sequential              | True                                             |
+| 13 | adapter_names               | entity_predict--amp                              |
+| 14 | input_dir                   | /home/simon/wikidata5m                           |
+| 15 | output_dir                  | checkpoints                                      |
+| 16 | trained_model               |                                                  |
+| 17 | amp                         | False                                            |
+| 18 | save_step                   | 2000                                             |
+| 19 | max_seq_length              | 64                                               |
+| 20 | num_workers                 | 32                                               |
+| 21 | warmup_proportion           | 0.1                                              |
+| 22 | CRate                       | 8                                                |
+| 23 | n_partition                 | 10                                               |
+| 24 | sub_group_idx               |                                                  |
+| 25 | bi_direction                | False                                            |
+| 26 | adapter_layers              |                                                  |
+| 27 | gradient_accumulation_steps | 1                                                |
+| 28 | model_str                   | roberta-base_20220127_130409_adapter             |
+| 29 | save_path                   | checkpoints/roberta-base_20220127_130409_adapter |
++----+-----------------------------+--------------------------------------------------+
+--------------------------------------------------------------------------------
+generate random seed 1643259849
+Loading entities (subset mode:1.0) ent_total:4813491 len(self.id2ent): 4813491
+Read Relation File
+825 relations loaded.
+['instance of', 'languages spoken, written or signed', 'director', 'country of citizenship', 'member of sports team', 'located in the administrative territorial entity', 'place of birth', 'followed by', 'cast member', 'exhibition history']
+Traceback (most recent call last):
+  File "run_pretrain.py", line 276, in <module>
+    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer)
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/transformers/tokenization_auto.py", line 341, in from_pretrained
+    return tokenizer_class_py.from_pretrained(pretrained_model_name_or_path, *inputs, **kwargs)
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/transformers/tokenization_utils_base.py", line 1623, in from_pretrained
+    resolved_vocab_files[file_id] = cached_path(
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/transformers/file_utils.py", line 948, in cached_path
+    output_path = get_from_cache(
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/transformers/file_utils.py", line 1075, in get_from_cache
+    r = requests.head(url, headers=headers, allow_redirects=False, proxies=proxies, timeout=etag_timeout)
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/requests/api.py", line 102, in head
+    return request('head', url, **kwargs)
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/requests/sessions.py", line 542, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/requests/sessions.py", line 655, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/requests/adapters.py", line 439, in send
+    resp = conn.urlopen(
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/urllib3/connectionpool.py", line 699, in urlopen
+    httplib_response = self._make_request(
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/urllib3/connectionpool.py", line 382, in _make_request
+    self._validate_conn(conn)
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/urllib3/connectionpool.py", line 1010, in _validate_conn
+    conn.connect()
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/urllib3/connection.py", line 358, in connect
+    conn = self._new_conn()
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/urllib3/connection.py", line 174, in _new_conn
+    conn = connection.create_connection(
+  File "/home/simon/anaconda3/envs/ruiyu/lib/python3.8/site-packages/urllib3/util/connection.py", line 86, in create_connection
+    sock.connect(sa)

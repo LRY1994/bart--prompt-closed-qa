@@ -1,0 +1,26 @@
+2022-01-27 13:04:07,551 INFO    MainThread:42753 [wandb_setup.py:_flush():71] setting env: {}
+2022-01-27 13:04:07,551 INFO    MainThread:42753 [wandb_setup.py:_flush():71] setting login settings: {}
+2022-01-27 13:04:07,551 INFO    MainThread:42753 [wandb_init.py:_log_setup():371] Logging user logs to /home/simon/knowledge-infusion/src/train_adapter/relation_prompt/wandb/run-20220127_130407-609698m7/logs/debug.log
+2022-01-27 13:04:07,551 INFO    MainThread:42753 [wandb_init.py:_log_setup():372] Logging internal logs to /home/simon/knowledge-infusion/src/train_adapter/relation_prompt/wandb/run-20220127_130407-609698m7/logs/debug-internal.log
+2022-01-27 13:04:07,551 INFO    MainThread:42753 [wandb_init.py:init():404] calling init triggers
+2022-01-27 13:04:07,551 INFO    MainThread:42753 [wandb_init.py:init():409] wandb.init called with sweep_config: {}
+config: {}
+2022-01-27 13:04:07,551 INFO    MainThread:42753 [wandb_init.py:init():449] starting backend
+2022-01-27 13:04:07,552 INFO    MainThread:42753 [backend.py:_multiprocessing_setup():95] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2022-01-27 13:04:07,557 INFO    MainThread:42753 [backend.py:ensure_launched():199] starting backend process...
+2022-01-27 13:04:07,560 INFO    MainThread:42753 [backend.py:ensure_launched():204] started backend process with pid: 42803
+2022-01-27 13:04:07,561 INFO    MainThread:42753 [wandb_init.py:init():458] backend started and connected
+2022-01-27 13:04:07,562 INFO    MainThread:42753 [wandb_init.py:init():519] updated telemetry
+2022-01-27 13:04:07,572 INFO    MainThread:42753 [wandb_init.py:init():549] communicating current version
+2022-01-27 13:04:07,987 INFO    MainThread:42753 [wandb_init.py:init():554] got version response upgrade_message: "wandb version 0.12.9 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2022-01-27 13:04:07,987 INFO    MainThread:42753 [wandb_init.py:init():564] communicating run to backend with 30 second timeout
+2022-01-27 13:04:08,583 INFO    MainThread:42753 [wandb_init.py:init():592] starting run threads in backend
+2022-01-27 13:04:09,890 INFO    MainThread:42753 [wandb_run.py:_console_start():1816] atexit reg
+2022-01-27 13:04:09,890 INFO    MainThread:42753 [wandb_run.py:_redirect():1690] redirect: SettingsConsole.REDIRECT
+2022-01-27 13:04:09,890 INFO    MainThread:42753 [wandb_run.py:_redirect():1695] Redirecting console.
+2022-01-27 13:04:09,891 INFO    MainThread:42753 [wandb_run.py:_redirect():1751] Redirects installed.
+2022-01-27 13:04:09,891 INFO    MainThread:42753 [wandb_init.py:init():619] run started, returning control to user process
+2022-01-27 13:04:43,468 INFO    MainThread:42753 [wandb_run.py:_config_callback():962] config_cb None None {'epochs': 2, 'cuda': True, 'batch_size': 64, 'lr': 0.0001, 'seed': 1643259849, 'patience': 5, 'model': 'roberta-base', 'tokenizer': 'roberta-base', 'subset': 1.0, 'use_adapter': True, 'shuffle_rate': None, 'cache_token_encodings': False, 'non_sequential': True, 'adapter_names': 'entity_predict--amp', 'input_dir': '/home/simon/wikidata5m', 'output_dir': 'checkpoints', 'trained_model': None, 'amp': False, 'save_step': 2000, 'max_seq_length': 64, 'num_workers': 32, 'warmup_proportion': 0.1, 'CRate': 8, 'n_partition': 10, 'sub_group_idx': None, 'bi_direction': False, 'adapter_layers': None, 'gradient_accumulation_steps': 1, 'model_str': 'roberta-base_20220127_130409_adapter', 'save_path': 'checkpoints/roberta-base_20220127_130409_adapter', 'device': 'cuda', 'n_gpu': 1, 'is_multilabel': False, 'is_hierarchical': False}
+2022-01-27 13:04:45,570 INFO    MainThread:42753 [wandb_run.py:_atexit_cleanup():1786] got exitcode: 255
+2022-01-27 13:04:45,570 INFO    MainThread:42753 [wandb_run.py:_restore():1758] restore
