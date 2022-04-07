@@ -126,8 +126,9 @@ def create_dataloader(examples, tokenizer, batch_size, max_input_length, max_out
 class BioAsqProcessor(BertProcessor):
     NAME = "webquestion"
     
-    def __init__(self, data_dir):
+    def __init__(self, data_dir,logger):
         self.train_df, self.dev_df, self.test_df = load_bioasq(data_dir)
+        self.logger = logger
 
     def get_train_examples(self):
         return self._create_examples(self.train_df, set_type="train")
@@ -148,7 +149,7 @@ class BioAsqProcessor(BertProcessor):
             examples.append(
                 InputExample(input_text=input_text, target_text=target_text)
             )
-        print(
+        self.logger.info(
             f"Get {len(examples)} examples of {self.NAME} datasets for {set_type} set"
         )
         return examples

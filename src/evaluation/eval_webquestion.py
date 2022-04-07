@@ -274,9 +274,6 @@ if __name__ == "__main__":
     logger.info("Device: {} ".format(str(device).upper()))
     logger.info("Number of GPUs: {} ".format(n_gpu))
   
-    # print("Device:", str(device).upper())
-    # print("Number of GPUs:", n_gpu)
-    # print("AMP:", args.amp)
 
     train_acc_list = []
     dev_acc_list = []
@@ -291,12 +288,12 @@ if __name__ == "__main__":
     # wandb.config.update(args)
     print_args_as_table(args)
 
-    processor = BioAsqProcessor(args.data_dir)   
+    processor = BioAsqProcessor(args.data_dir, logger)   
     tokenizer = BartTokenizer.from_pretrained(args.base_model)
 
     for i in range(args.repeat_runs):
         logger.info( f'**Start the {i}th/{args.repeat_runs}(args.repeat_runs) training.****' )
-        # print(f"***********************Start the {i}th/{args.repeat_runs}(args.repeat_runs) training.***************************")
+    
         # Set random seed for reproducibility
         seed = int(time.time())
         logger.info(f"Generate random seed {seed}.")
