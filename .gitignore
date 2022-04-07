@@ -1,5 +1,5 @@
-/output/
-/temp/
+output
+temp
 /src/data/
 /src/datasets/
 /*/__pycache__
