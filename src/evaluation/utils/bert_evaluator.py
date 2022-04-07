@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore")
 
 class BertEvaluator(object):
     def __init__(
-        self, model, processor, tokenizer, args, split="dev", dump_predictions=False, 
+        self, model, processor, tokenizer, args, logger,split="dev",
         
     ):
         self.args = args
@@ -29,7 +29,7 @@ class BertEvaluator(object):
         self.processor = processor
         self.tokenizer = tokenizer
         self.split = split
-        self.dump_predictions = dump_predictions
+        self.logger = logger
         self.device = args.device
         if (split == 'dev'): self.eval_examples = self.processor.get_dev_examples()
         if (split == 'train'): self.eval_examples = self.processor.get_train_examples()
@@ -116,7 +116,7 @@ class BertEvaluator(object):
         #     for key in sorted(results.keys()):
         #         writer.write("{} = {}\n".format(key, str(results[key])))
 
-        print(results)
+        
 
         return results #{eval_loss,predict_correct_num,predict_correct_ratio}
             

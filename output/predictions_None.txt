@@ -5,37 +5,37 @@ to_predict
 	nomalize_target
 	\EM
 what is michael kors best known for?
-	Michael Kors
+	Mitch McConnell
 	Fashion Designer
-	michael kors
+	mitch mcconnell
 	['fashion designer']
 	-1
 
 who plays charlie in the santa clause movies?
-	Who plays charlie in the santa clause movies
+	Seth Rogen
 	Kansas City Athletics
-	who plays charlie in santa clause movies
+	seth rogen
 	['kansas city athletics']
 	-1
 
 where does the expression excuse my french come from?
-	Where does the expression excuse my french come from?
+	French
 	English Literature
-	where does expression excuse my french come from
+	french
 	['english literature']
 	-1
 
 what was napoleon bonaparte accomplishments?
-	
+	Napoleon Bonaparte
 	Battle of Landshut	Battle of Teugen-Hausen	Battle of Bassano	Second Battle of Dego	Battle of Mondovi	Battle of Montenotte	Battle of Mount Tabor	Battle of Castiglione	Battle of Waterloo	Battle of Rovereto
-	
+	napoleon bonaparte
 	['battle of landshut', 'battle of teugenhausen', 'battle of bassano', 'second battle of dego', 'battle of mondovi', 'battle of montenotte', 'battle of mount tabor', 'battle of castiglione', 'battle of waterloo', 'battle of rovereto']
 	-1
 
 what highschool did r. kelly attend?
-	R.C.
+	R.E.R.
 	Kenwood Academy
-	rc
+	rer
 	['kenwood academy']
 	-1
 
@@ -47,14 +47,14 @@ what happened at benghazi?
 	-1
 
 what country is nike based in?
-	The United States of America
+	Nigeria
 	United States of America
-	united states of america
+	nigeria
 	['united states of america']
-	1
+	-1
 
 what is the percentage of youth in uganda?
-	The African National Congress
+	African National Congress
 	Uganda
 	african national congress
 	['uganda']
@@ -68,79 +68,79 @@ what kind of money do i bring to mexico?
 	-1
 
 who did steve spurrier play pro football for?
-	Who did steve spurrier play pro football for?
+	The Great American Football League
 	San Francisco 49ers
-	who did steve spurrier play pro football for
+	great american football league
 	['san francisco 49ers']
 	-1
 
 what is the only colony on the south america continent?
-	The Colony of the South
+	New York City
 	French Guiana
-	colony of south
+	new york city
 	['french guiana']
 	-1
 
 where do the blackhawks play?
-	The Blackhawks
+	Kansas
 	United Center
-	blackhawks
+	kansas
 	['united center']
 	-1
 
 who plays john connor?
-	The Man Who Killed Elvis
+	John Conroy
 	Edward Furlong	Christian Bale	Nick Stahl
-	man who killed elvis
+	john conroy
 	['edward furlong', 'christian bale', 'nick stahl']
 	-1
 
 what is the main language spoken in mexico?
-	Ciclos
+	México
 	Spanish Language
-	ciclos
+	méxico
 	['spanish language']
 	-1
 
 what are italians classified as?
-	
+	Red-headed
 	Latin European peoples	Europeans
-	
+	redheaded
 	['latin european peoples', 'europeans']
 	-1
 
 what has angelina jolie accomplished?
-	Romeo and Juliet
+	Rafael
 	Golden Globe Award for Best Supporting Actress - Series, Miniseries or Television Film	Academy Award for Actress in a Supporting Role	BFCA Critics' Choice Award for Best Supporting Actress	Golden Globe Award for Best Performance by an Actress In A Mini-series or Motion Picture Made for Television	Satellite Award for Best Actress – Miniseries or Television Film	People's Choice Award for Favorite Female Action Star	Satellite Award for Best Actress – Motion Picture Drama	Golden Globe Award for Best Supporting Actress - Film
-	romeo and juliet
+	rafael
 	['golden globe award for best supporting actress series miniseries or television film', 'academy award for actress in supporting role', 'bfca critics choice award for best supporting actress', 'golden globe award for best performance by actress in miniseries or motion picture made for television', 'satellite award for best actress – miniseries or television film', 'peoples choice award for favorite female action star', 'satellite award for best actress – motion picture drama', 'golden globe award for best supporting actress film']
 	-1
 
 who played captain kirk in star trek movie?
-	The Last Jedi
+	The Hobbit
 	William Shatner
-	last jedi
+	hobbit
 	['william shatner']
 	-1
 
 who played dana scully in x files?
-	The Man Who Played Dana
+	Dana Johnson
 	Gillian Anderson
-	man who played dana
+	dana johnson
 	['gillian anderson']
 	-1
 
 who was the first governor of colonial south carolina?
-	Romeo and Juliet
+	Juan Manuel de la Torre
 	Thomas Pinckney
-	romeo and juliet
+	juan manuel de la torre
 	['thomas pinckney']
 	-1
 
 what was f. scott fitzgerald?
-	F. Scott Fitzgerald
+	Fitzgerald
 	Poet	Novelist	Writer
-	f scott fitzgerald
+	fitzgerald
 	['poet', 'novelist', 'writer']
 	-1
 
@@ -159,16 +159,16 @@ who is the coach for the new york knicks?
 	-1
 
 who was wesley snipes?
-	The Great American Race
+	Wesley
 	Film Producer	Martial artist	Actor
-	great american race
+	wesley
 	['film producer', 'martial artist', 'actor']
 	-1
 
 where does sherrod brown live?
-	Where does sherrod brown live
+	Sherrod Brown
 	Mansfield
-	where does sherrod brown live
+	sherrod brown
 	['mansfield']
 	-1
 
@@ -180,16 +180,16 @@ what kind of language does colombia speak?
 	-1
 
 what currency does england use now?
-	Gold
+	The Republic of Ireland
 	UK £
-	gold
+	republic of ireland
 	['uk £']
 	-1
 
 who was the original voice of meg griffin on family guy?
-	The Last Man Standing
+	Ralph Nader
 	Lacey Chabert
-	last man standing
+	ralph nader
 	['lacey chabert']
 	-1
 
@@ -201,51 +201,51 @@ what kind of government is mali?
 	-1
 
 who did cristiano ronaldo play for in 2010?
-	Ronaldo
+	Manchester United
 	Real Madrid C.F.
-	ronaldo
+	manchester united
 	['real madrid cf']
 	-1
 
 what is the zip code for morgantown wv?
-	New York City
+	Moraga County
 	26508	26501	26502	26504	26505	26506	26507
-	new york city
+	moraga county
 	['26508', '26501', '26502', '26504', '26505', '26506', '26507']
 	-1
 
 what is jacksonville fl timezone?
-	New York City
+	North Carolina
 	North American Eastern Time Zone
-	new york city
+	north carolina
 	['north american eastern time zone']
 	-1
 
 who does amy stiller play in dodgeball?
-	Randy
+	Dodgeball
 	Keno Waitress
-	randy
+	dodgeball
 	['keno waitress']
 	-1
 
 who were king henry vii children?
-	The King's Children
+	The Seven Dwarfs
 	Arthur, Prince of Wales	Margaret Tudor	Mary Tudor, Queen of France	Henry VIII of England	Edward Tudor	Katherine Tudor	Edmund Tudor, Duke of Somerset	Elizabeth Tudor
-	kings children
+	seven dwarfs
 	['arthur prince of wales', 'margaret tudor', 'mary tudor queen of france', 'henry viii of england', 'edward tudor', 'katherine tudor', 'edmund tudor duke of somerset', 'elizabeth tudor']
 	-1
 
 who plays mary jane in the spiderman movies?
-	who plays mary jane in the spiderman movies
+	Mary J. Blunt
 	Sara Ballantine	Kirsten Dunst
-	who plays mary jane in spiderman movies
+	mary j blunt
 	['sara ballantine', 'kirsten dunst']
 	-1
 
 who does mila kunis play on family guy?
-	Konstantinov
+	Romeo and Juliet
 	Meg Griffin
-	konstantinov
+	romeo and juliet
 	['meg griffin']
 	-1
 
@@ -257,30 +257,30 @@ when did the san francisco earthquake occur?
 	-1
 
 who played damien in the omen 2006?
-	Romeo and Juliet
+	Raphael Sondheim
 	Harvey Stephens	Tomas Wooler	Jonathan Scott-Taylor	Sam Neill	Seamus Davey-Fitzpatrick
-	romeo and juliet
+	raphael sondheim
 	['harvey stephens', 'tomas wooler', 'jonathan scotttaylor', 'sam neill', 'seamus daveyfitzpatrick']
 	-1
 
 what athlete am i olympics?
-	Olympic Games
+	Olympic champion
 	The complete book of the Winter Olympics
-	olympic games
+	olympic champion
 	['complete book of winter olympics']
 	-1
 
 who played denver in four christmases?
-	The Last Jedi
+	Ralph Northam
 	William E. Adams	James Buck	George V. Kelley	Maximo Yabes	Debbie	Barbara Katie Chapman	Zebediah Duane Chapman
-	last jedi
+	ralph northam
 	['william e adams', 'james buck', 'george v kelley', 'maximo yabes', 'debbie', 'barbara katie chapman', 'zebediah duane chapman']
 	-1
 
 what to do with kids in essex?
-	The New York Times
+	Sydney
 	RHS Garden, Hyde Hall	Mountfitchet Castle	Marsh Farm Country Park	Thorndon Country Park	Green Island Gardens	Mistley Place Park	Beth Chatto Gardens	Colchester Zoo	Waltham Abbey Royal Gunpowder Mills	Cudmore Grove Country Park
-	new york times
+	sydney
 	['rhs garden hyde hall', 'mountfitchet castle', 'marsh farm country park', 'thorndon country park', 'green island gardens', 'mistley place park', 'beth chatto gardens', 'colchester zoo', 'waltham abbey royal gunpowder mills', 'cudmore grove country park']
 	-1
 
@@ -292,9 +292,9 @@ who did the cleveland cavaliers draft?
 	-1
 
 what concentration camp did anne frank died in?
-	The Auschwitz-Birkenau concentration camp
+	Prisoner
 	Bergen-Belsen concentration camp
-	auschwitzbirkenau concentration camp
+	prisoner
 	['bergenbelsen concentration camp']
 	-1
 
@@ -313,16 +313,16 @@ what language does east timor speak?
 	-1
 
 what is the currency in italy?
-	
+	The Indian rupee
 	Euro
-	
+	indian rupee
 	['euro']
 	-1
 
 where does greek language come from?
-	Where does greek language come from?
+	Greek
 	Indo-European languages
-	where does greek language come from
+	greek
 	['indoeuropean languages']
 	-1
 
@@ -334,16 +334,16 @@ what is the name of the currency used in italy?
 	-1
 
 where is audrey hepburn from?
-	Where is audrey hepburn from?
+	Hepburn
 	Ixelles
-	where is audrey hepburn from
+	hepburn
 	['ixelles']
 	-1
 
 where did the australian floods take place?
-	Where did the australian floods take place?
+	The Great Australian Outback
 	Queensland
-	where did australian floods take place
+	great australian outback
 	['queensland']
 	-1
 
@@ -355,23 +355,23 @@ who does darth vaders voice?
 	-1
 
 when is nrl grand final day?
-	Australia v New Zealand
+	Rugby
 	NRL Grand Final
-	australia v new zealand
+	rugby
 	['nrl grand final']
 	-1
 
 what school did douglas macarthur go to?
-	The School of the Holy Cross
+	MacArthur College
 	TMI — The Episcopal School of Texas
-	school of holy cross
+	macarthur college
 	['tmi — episcopal school of texas']
 	-1
 
 what famous people are from barbados?
-	The most famous people are from barbados
+	Barbados
 	Owen Arthur	John Michael Geoffrey Manningham Adams	Gregory Goodridge	Hugh Gordon Cummins	Anne Cools	Errol Barrow	William T. Shorey	Grantley Herbert Adams	Lloyd Erskine Sandiford	Robert Bailey
-	most famous people are from barbados
+	barbados
 	['owen arthur', 'john michael geoffrey manningham adams', 'gregory goodridge', 'hugh gordon cummins', 'anne cools', 'errol barrow', 'william t shorey', 'grantley herbert adams', 'lloyd erskine sandiford', 'robert bailey']
 	-1
 
@@ -383,9 +383,9 @@ what is the name of the currency used in china?
 	-1
 
 what are the names of michael jackson's 3 children?
-	The Associated Press
+	Jared and Mariah
 	Paris-Michael Katherine Jackson	Prince Michael Jackson I	Prince Michael Jackson II
-	associated press
+	jared and mariah
 	['parismichael katherine jackson', 'prince michael jackson i', 'prince michael jackson ii']
 	-1
 
@@ -397,23 +397,23 @@ what currency to take to turkey 2010?
 	-1
 
 who is the current governor of arizona 2010?
-	Romeo and Juliette
+	Romeo Andrés Zapata
 	Jan Brewer
-	romeo and juliette
+	romeo andrés zapata
 	['jan brewer']
 	-1
 
 when was the most recent earthquake in haiti?
-	Rajasthan
+	Haiti
 	2010 Haiti Earthquake
-	rajasthan
+	haiti
 	['2010 haiti earthquake']
 	-1
 
 who is lamar odom playing for this year?
-	The New York Yankees
+	The Young Lions
 	Los Angeles Clippers
-	new york yankees
+	young lions
 	['los angeles clippers']
 	-1
 
@@ -425,7 +425,7 @@ where were the great pyramids of giza built?
 	-1
 
 who designed national flag of italy?
-	The United States
+	United States
 	Corriere della Sera	l'Unità	Il Foglio	la Repubblica	Il Messaggero	La Domenica del Corriere	La Stampa	Avanti!	La Gazzetta dello Sport	Liberazione
 	united states
 	['corriere della sera', 'lunità', 'il foglio', 'la repubblica', 'il messaggero', 'la domenica del corriere', 'la stampa', 'avanti', 'la gazzetta dello sport', 'liberazione']
@@ -439,44 +439,44 @@ what language do the russian speak?
 	-1
 
 what language do australia people speak?
-	Australia
+	Australiana
 	Lojban	Esperanto Language	English Language
-	australia
+	australiana
 	['lojban', 'esperanto language', 'english language']
 	-1
 
 what country was king tut's tomb found?
-	King Tut's tomb found
+	Egypt
 	Ancient Egypt
-	king tuts tomb found
+	egypt
 	['ancient egypt']
 	-1
 
 where did abraham and his descendants live?
-	Where did abraham and his descendants live
+	Abraham
 	Canaan
-	where did abraham and his descendants live
+	abraham
 	['canaan']
 	-1
 
 where did george washington carver go to collage?
-	Where did george washington carver go to collage
+	Ralph Waldo Emerson
 	Tuskegee University	Iowa State University	Simpson College
-	where did george washington carver go to collage
+	ralph waldo emerson
 	['tuskegee university', 'iowa state university', 'simpson college']
 	-1
 
 what are the sports in spain?
-	
+	Rome
 	Spain women's national handball team	Spain men's national volleyball team	Spain national beach handball team	Spain national football team	Spain women's national volleyball team	Spain national handball team
-	
+	rome
 	['spain womens national handball team', 'spain mens national volleyball team', 'spain national beach handball team', 'spain national football team', 'spain womens national volleyball team', 'spain national handball team']
 	-1
 
 where president obama was born?
-	Where president obama was born
+	United States
 	Honolulu
-	where president obama was born
+	united states
 	['honolulu']
 	-1
 
@@ -488,114 +488,114 @@ what sports do people play in poland?
 	-1
 
 who was demi lovato dating?
-	Cristina
+	Ricardo and Maria
 	Joe Jonas
-	cristina
+	ricardo and maria
 	['joe jonas']
 	-1
 
 where did tony gonzalez play college basketball?
-	Where did tony gonzalez play college basketball?
+	Rome
 	University of California, Berkeley
-	where did tony gonzalez play college basketball
+	rome
 	['university of california berkeley']
 	-1
 
 what films has scarlett johansson been in?
-	The Golden Girls
+	Scarlett Johansson
 	Girl with a Pearl Earring	Fall	A Good Woman	A Love Song for Bobby Long	Don Jon's Addiction	Eight Legged Freaks	Ghost World	Captain America: The Winter Soldier	An American Rhapsody
-	golden girls
+	scarlett johansson
 	['girl with pearl earring', 'fall', 'good woman', 'love song for bobby long', 'don jons addiction', 'eight legged freaks', 'ghost world', 'captain america winter soldier', 'american rhapsody']
 	-1
 
 who originally voiced meg on family guy?
-	The Simpsons
+	Ralph Fiennes
 	Mila Kunis
-	simpsons
+	ralph fiennes
 	['mila kunis']
 	-1
 
 who played amy squirrel in bad teacher?
-	The Man Who Played the Squirrel
+	Ralph N.F.C.
 	Lucy Punch
-	man who played squirrel
+	ralph nfc
 	['lucy punch']
 	-1
 
 where are boeing headquarters?
-	The International Hotel
+	Boer State University
 	Seattle	Chicago
-	international hotel
+	boer state university
 	['seattle', 'chicago']
 	-1
 
 what type of religions are in the united states?
-	The United States
+	The United States of America
 	Unitarian Universalism	Judaism	Christianity	Atheism	Buddhism	Hinduism	Islam
-	united states
+	united states of america
 	['unitarian universalism', 'judaism', 'christianity', 'atheism', 'buddhism', 'hinduism', 'islam']
 	-1
 
 who did viggo mortensen play in lord of the rings?
-	The Golden Age
+	Romeo and Juliet
 	Aragorn
-	golden age
+	romeo and juliet
 	['aragorn']
 	-1
 
 what lands did henry hudson discover?
-	The White House
+	The Seven Kingdoms
 	Hudson Bay
-	white house
+	seven kingdoms
 	['hudson bay']
 	-1
 
 who was isaac newton and what did he do?
-	The Last Days of the King
+	Ralph Northam
 	Mathematician	Physicist	Philosopher	Astronomer	Scientist	Chemist
-	last days of king
+	ralph northam
 	['mathematician', 'physicist', 'philosopher', 'astronomer', 'scientist', 'chemist']
 	-1
 
 who did william shakespeare marry?
-	The Queen
+	William Shakespeare
 	Anne Hathaway
-	queen
+	william shakespeare
 	['anne hathaway']
 	-1
 
 what movies queen latifah is in?
-	The Black Panther
+	Queen Latifah
 	Taxi	Jungle Fever	Set It Off	Stranger than Fiction	Last Holiday	Brown Sugar	Ice Age: The Meltdown	Ice Age: Dawn of the Dinosaurs	Hairspray	Bringing Down the House
-	black panther
+	queen latifah
 	['taxi', 'jungle fever', 'set it off', 'stranger than fiction', 'last holiday', 'brown sugar', 'ice age meltdown', 'ice age dawn of dinosaurs', 'hairspray', 'bringing down house']
 	-1
 
 where did michelle obama graduated from?
-	Where did michelle obama graduated from
+	Rome
 	Harvard Law School	Whitney M. Young Magnet High School	Princeton University
-	where did michelle obama graduated from
+	rome
 	['harvard law school', 'whitney m young magnet high school', 'princeton university']
 	-1
 
 what kind of music did franz liszt compose?
-	Germanic Music
+	German Expressionist
 	Opera	Classical music	Romantic music	Art song	Chamber music
-	germanic music
+	german expressionist
 	['opera', 'classical music', 'romantic music', 'art song', 'chamber music']
 	-1
 
 what country does david luiz play for?
-	United States of America
+	United States
 	Brazil
-	united states of america
+	united states
 	['brazil']
 	-1
 
 what document did thomas jefferson wrote?
-	The First Amendment
+	The American Revolution
 	Notes on the State of Virginia	Jefferson abroad	Jefferson the man	Jefferson in love	United States Declaration of Independence	Jefferson on Jefferson	Ye will say I am no Christian	Jefferson Bible	Citizen Jefferson	Light and liberty
-	first amendment
+	american revolution
 	['notes on state of virginia', 'jefferson abroad', 'jefferson man', 'jefferson in love', 'united states declaration of independence', 'jefferson on jefferson', 'ye will say i am no christian', 'jefferson bible', 'citizen jefferson', 'light and liberty']
 	-1
 
@@ -607,91 +607,91 @@ who is martin luther king jr facts?
 	-1
 
 where is victoria british columbia?
-	Romeo and Juliet
+	Ribby
 	Canada
-	romeo and juliet
+	ribby
 	['canada']
 	-1
 
 how many mary mary sisters?
-	The Marys
+	Mary
 	Erica Campbell	Tina Campbell
-	marys
+	mary
 	['erica campbell', 'tina campbell']
 	-1
 
 what do we call the currency of france?
-	The French Revolution
+	The French Republic
 	French franc
-	french revolution
+	french republic
 	['french franc']
 	-1
 
 where do scottish people originate from?
-	Where do scottish people originate from?
+	Rome
 	Celts	Europeans
-	where do scottish people originate from
+	rome
 	['celts', 'europeans']
 	-1
 
 what team does david beckham play for in 2012?
-	New York Giants
+	United States
 	LA Galaxy
-	new york giants
+	united states
 	['la galaxy']
 	-1
 
 what movies did nick cannon star in?
-	The Last Jedi
+	The Hunger Games
 	A Very School Gyrls Holla-Day	Bobby	Day of the Dead	Even Money	Goal II: Living the Dream	American Son	Weapons	Ball Don't Lie	The Killing Room	Monster House
-	last jedi
+	hunger games
 	['very school gyrls holladay', 'bobby', 'day of dead', 'even money', 'goal ii living dream', 'american son', 'weapons', 'ball dont lie', 'killing room', 'monster house']
 	-1
 
 what radio station is npr on in nyc?
-	Czech Republic
+	Rome
 	WNYC
-	czech republic
+	rome
 	['wnyc']
 	-1
 
 who did tom landry play for?
-	The Black Hawk
+	The Great War
 	Texas Longhorns football	New York Giants	New York Yankees
-	black hawk
+	great war
 	['texas longhorns football', 'new york giants', 'new york yankees']
 	-1
 
 where was john jay born?
-	Where was john jay born?
+	John J.
 	New York City
-	where was john jay born
+	john j
 	['new york city']
 	-1
 
 where is mount fuji located?
-	The Japanese Air Force Base
+	Japan
 	Honshu
-	japanese air force base
+	japan
 	['honshu']
 	-1
 
 when is venus brightest?
-	The Great Divide
+	Venus
 	Western astrology
-	great divide
+	venus
 	['western astrology']
 	-1
 
 where was toussaint l'ouverture born?
-	Where was toussaint l'ouverture born?
+	Saint-Denis
 	Haiti
-	where was toussaint louverture born
+	saintdenis
 	['haiti']
 	-1
 
 what countries makes up the uk?
-	The United States
+	United States
 	Scotland	England	Wales	Northern Ireland
 	united states
 	['scotland', 'england', 'wales', 'northern ireland']

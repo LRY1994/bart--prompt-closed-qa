@@ -17,11 +17,11 @@ python src/evaluation/eval_webquestion.py \
 --base_model $BASE_MODEL \
 --tokenizer $BASE_MODEL  \
 --model $MODEL  \
---batch_size 2 \
---eval_batch_size 2 \
+--batch_size 16 \
+--eval_batch_size 16 \
 --learning_rate $LR   \
 --pretrain_epoch 0 \
---epochs 2 \
+--epochs 20 \
 --repeat_runs 2 \
 --temperature $T \
 --output_dir  $OUTPUT_DIR  \

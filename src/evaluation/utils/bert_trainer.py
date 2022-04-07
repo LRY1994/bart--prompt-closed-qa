@@ -1,3 +1,4 @@
+from asyncio.log import logger
 import datetime
 import sys
 import json
@@ -17,27 +18,20 @@ from transformers import (
 )
 
 class BertTrainer(object):
-    def __init__(self, model, processor, tokenizer, args):      
+    def __init__(self, model, processor, tokenizer, args,logger):      
         self.args = args
         self.model = model
         self.processor = processor
         self.tokenizer = tokenizer
         self.device = args.device
         self.train_examples = self.processor.get_train_examples()
+        self.logger = logger
        
         model_str = self.args.model
         if "/" in model_str:
             model_str = model_str.split("/")[1]#bart-base
 
-        self.num_train_optimization_steps = (
-            int(
-                len(self.train_examples)
-                / args.batch_size
-                / args.gradient_accumulation_steps
-            )
-            * args.epochs
-        )
-
+     
         self.log_header = (
             "Epoch Iteration Progress   Dev/Acc.  Dev/Pr.  Dev/Re.   Dev/F1   Dev/Loss"
         )
@@ -72,6 +66,8 @@ class BertTrainer(object):
             int(len(train_examples) / args.batch_size / args.gradient_accumulation_steps)
             * args.epochs
         )
+        self.num_train_optimization_steps = num_train_optimization_steps
+
         param_optimizer = list(self.model.named_parameters())
         no_decay = ["bias", "LayerNorm.weight"]
         optimizer_grouped_parameters = [
@@ -125,7 +121,7 @@ class BertTrainer(object):
     def train_epoch(self, train_dataloader,epoch_number):
         tr_loss = 0
         
-
+        logger.info(f"Running Epoch {epoch_number} of {self.args.epochs} ")
         batch_iterator = tqdm(
             train_dataloader,
             desc=f"Running Epoch {epoch_number} of {self.args.epochs} ",
@@ -173,7 +169,7 @@ class BertTrainer(object):
                 self.model.zero_grad()
                 self.global_step += 1
         
-        
+        logger.info(f"Epoch Training Loss :{tr_loss}")
         self.epoch_losses.append(tr_loss)
             
 
@@ -184,11 +180,14 @@ class BertTrainer(object):
     def train(self):
          
         self.model.train()
-            
-        print("Number of train examples: ", len(self.train_examples))
-        print("Batch size:", self.args.batch_size)
-        print("Num of steps:", self.num_train_optimization_steps)
+        logger = self.logger
         args = self.args
+            
+        logger.info(f"Number of train examples: {len(self.train_examples)}")
+        logger.info(f"Batch size:{args.batch_size}")
+        logger.info(f"Num of steps:{self.num_train_optimization_steps}")
+        
+        
        
         train_dataloader = create_dataloader(
             self.train_examples, 
@@ -202,12 +201,14 @@ class BertTrainer(object):
         
         for epoch in train_iterator:
             train_iterator.set_description(f"Epoch {epoch } of {args.epochs}")
+            logger.info(f"Epoch {epoch } of {args.epochs}")
             self.train_epoch(train_dataloader,epoch)
 
             dev_evaluator = BertEvaluator(
-                self.model, self.processor, self.tokenizer, self.args, split="dev"
+                self.model, self.processor, self.tokenizer, self.args, logger,split="dev"
             )
             results = dev_evaluator.get_scores()
+            logger.info(results)
             
             
 
@@ -225,5 +226,10 @@ class BertTrainer(object):
                             epoch, self.best_dev_acc
                         )
                     )
+                    logger.info("Early Stopping. Epoch: {}, Best Dev performance: {}".format(
+                            epoch, self.best_dev_acc
+                        ))
                     break
-    
+                    
+            
+            logger.info(f"Epoch ALL Loss :{self.epoch_losses}")        

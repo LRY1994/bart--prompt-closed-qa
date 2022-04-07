@@ -7,7 +7,7 @@ from datetime import datetime
 from os import listdir
 from statistics import mean, stdev
 from xmlrpc.client import boolean
-
+import logging
 import numpy as np
 import torch
 from transformers import (
@@ -119,9 +119,9 @@ def get_args():
     return args
 
 
-def evaluate_split(model, processor, tokenizer, args, split="dev"):
-    evaluator = BertEvaluator(model, processor, tokenizer, args, split, True)
-    result = evaluator.get_scores(silent=True)
+def evaluate_split(model, processor, tokenizer, args, logger,split="dev"):
+    evaluator = BertEvaluator(model, processor, tokenizer, args, logger,split )
+    result = evaluator.get_scores()
     split_result = {}
     for k, v in result.items():
         split_result[f"{split}_{k}"] = v
@@ -203,50 +203,6 @@ def check_adapter_names(model_path, adapter_names):
     return checked_adapter_names
 
 
-def prepare_opt_sch(model, args):
-    """Prepare optimizer and scheduler.
-
-    Args:
-        model ([type]): [description]
-        args ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """
-    train_examples = processor.get_train_examples()
-    num_train_optimization_steps = (
-        int(len(train_examples) / args.batch_size / args.gradient_accumulation_steps)
-        * args.epochs
-    )
-    param_optimizer = list(model.named_parameters())
-    no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
-    optimizer_grouped_parameters = [
-        {
-            "params": [
-                p for n, p in param_optimizer if not any(nd in n for nd in no_decay)
-            ],
-            "weight_decay": 0.01,
-        },
-        {
-            "params": [
-                p for n, p in param_optimizer if any(nd in n for nd in no_decay)
-            ],
-            "weight_decay": 0.0,
-        },
-    ]
-
-    optimizer = AdamW(
-        optimizer_grouped_parameters,
-        lr=args.lr,
-        weight_decay=0.01,
-        correct_bias=False,
-    )
-    scheduler = WarmupLinearSchedule(
-        optimizer,
-        num_training_steps=num_train_optimization_steps,
-        num_warmup_steps=args.warmup_proportion * num_train_optimization_steps,
-    )
-    return optimizer, scheduler
 
 
 def load_fusion_adapter_model(args,base_model):
@@ -289,8 +245,23 @@ def load_adapter_model(args):
 
 
 if __name__ == "__main__":
+    
+
     args = get_args()
     print(args)
+    #### Start writing logs
+
+    log_filename = "log.txt"
+
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+                    datefmt='%m/%d/%Y %H:%M:%S',
+                    level=logging.INFO,
+                    handlers=[logging.FileHandler(os.path.join(args.output_dir, log_filename)),
+                              logging.StreamHandler()])
+    logger = logging.getLogger(__name__)
+    logger.info(args)
+    logger.info(args.output_dir)
+
     device = torch.device(
         "cuda" if (torch.cuda.is_available() and args.cuda) else "cpu"
     )
@@ -300,9 +271,12 @@ if __name__ == "__main__":
         model_str = model_str.split("/")[1]
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    print("Device:", str(device).upper())
-    print("Number of GPUs:", n_gpu)
-    print("AMP:", args.amp)
+    logger.info("Device: {} ".format(str(device).upper()))
+    logger.info("Number of GPUs: {} ".format(n_gpu))
+  
+    # print("Device:", str(device).upper())
+    # print("Number of GPUs:", n_gpu)
+    # print("AMP:", args.amp)
 
     train_acc_list = []
     dev_acc_list = []
@@ -321,10 +295,11 @@ if __name__ == "__main__":
     tokenizer = BartTokenizer.from_pretrained(args.base_model)
 
     for i in range(args.repeat_runs):
-        print(f"***********************Start the {i}th/{args.repeat_runs}(args.repeat_runs) training.***************************")
+        logger.info( f'**Start the {i}th/{args.repeat_runs}(args.repeat_runs) training.****' )
+        # print(f"***********************Start the {i}th/{args.repeat_runs}(args.repeat_runs) training.***************************")
         # Set random seed for reproducibility
         seed = int(time.time())
-        print(f"Generate random seed {seed}.")
+        logger.info(f"Generate random seed {seed}.")
         seed_list.append(seed)
         random.seed(seed)
         np.random.seed(seed)
@@ -347,28 +322,29 @@ if __name__ == "__main__":
         model.to(device)
         if n_gpu > 1:
             model = torch.nn.DataParallel(model)
-        # optimizer, scheduler = prepare_opt_sch(model, args)
+       
 
-        print("****************************Training Model****************************")
-        trainer = BertTrainer(model, processor, tokenizer, args)      
+        logger.info('***Training Model***')
+        trainer = BertTrainer(model, processor, tokenizer, args,logger)      
         trainer.train()
+       
 
         # 只取最好的
-        print("****************************Evaluating Model(modal is set)****************************")
+        logger.info("***Evaluating Model(modal is set)***")
         model = torch.load(args.best_model_dir + "model.bin")
 
 
-        train_result = evaluate_split(model, processor, tokenizer, args, split="train")
+        train_result = evaluate_split(model, processor, tokenizer, args, logger,split="train")
         train_result["run_num"] = i
         # wandb.log(train_result)  # Record Dev Result
         train_acc_list.append(train_result["train_correct_ratio"])
 
-        dev_result = evaluate_split(model, processor, tokenizer, args, split="dev")
+        dev_result = evaluate_split(model, processor, tokenizer, args, logger,split="dev")
         dev_result["run_num"] = i
         # wandb.log(dev_result)  # Record Dev Result
         dev_acc_list.append(dev_result["dev_correct_ratio"])
 
-        test_result = evaluate_split(model, processor, tokenizer, args, split="test")
+        test_result = evaluate_split(model, processor, tokenizer, args, logger,split="test")
         test_result["run_num"] = i
         # wandb.log(test_result)  # Record Testing Result
         test_acc_list.append(test_result["test_correct_ratio"])
@@ -378,10 +354,10 @@ if __name__ == "__main__":
         ):  # keep the models with excellent performance
             shutil.rmtree(args.best_model_dir)#递归地删除文件
         else:
-            print(f"Saving model to {args.best_model_dir}.")
-            print(f"correct_ratio of {test_result['test_correct_ratio']}.")
+            logger.info(f"Saving model to {args.best_model_dir}.")
+            logger.info(f"correct_ratio of {test_result['test_correct_ratio']}.")
 
-    print(f"****************************{args.repeat_runs} training is finished****************************")
+    logger.info(f"***{args.repeat_runs} training is finished****")
     result = {}
     result["seed_list"] = seed_list
     result["train_acc_mean"] = mean(train_acc_list)  # average of the ten runs
@@ -391,5 +367,6 @@ if __name__ == "__main__":
     result["test_acc_mean"] = mean(test_acc_list)  # average of the ten runs
     result["test_acc_std"] = stdev(test_acc_list)  # average of the ten runs
     # wandb.config.update(result)
+    logger.info(result)
     
     print(result)
