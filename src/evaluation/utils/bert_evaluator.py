@@ -208,11 +208,11 @@ class BertEvaluator(object):
                 groudtruth = target_predict[i].strip().split('\t')
                 groudtruth = [normalize_answer(g) for g in groudtruth]
                 
-                flag = False
+                flag = -1
                 if prediction in groudtruth:
                     # print(prediction +'\n'+str(groudtruth))
                     correct_num += 1
-                    flag = True
+                    flag = 1
                     
                 writer.write(to_predict[i]+"\n\t"+outputs[i]+"\n\t"+target_predict[i]+"\n\t"+prediction+"\n\t"+str(groudtruth)+"\n\t"+str(flag) +"\n\n")
 
