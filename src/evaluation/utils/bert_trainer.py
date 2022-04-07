@@ -4,11 +4,11 @@ import json
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, RandomSampler, TensorDataset, Dataset
-from tqdm import tqdm
+from tqdm.auto import tqdm, trange
 import pandas as pd
 from torch import Tensor, nn
 # from .abstract_processor import convert_examples_to_features
-from utils.bioasq_processor import get_inputs_dict,create_dataloader
+from utils.bioasq_processor import create_dataloader
 from .bert_evaluator import BertEvaluator
 from transformers.modeling_bart import shift_tokens_right
 from transformers import (
@@ -24,11 +24,7 @@ class BertTrainer(object):
         self.tokenizer = tokenizer
         self.device = args.device
         self.train_examples = self.processor.get_train_examples()
-        if args.train_ratio < 1:
-            keep_num = int(len(self.train_examples) * args.train_ratio) + 1
-            self.train_examples = self.train_examples[:keep_num]
-            print(f"Reduce Training example number to {keep_num}")
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+       
         model_str = self.args.model
         if "/" in model_str:
             model_str = model_str.split("/")[1]#bart-base
@@ -51,12 +47,14 @@ class BertTrainer(object):
             )
         )
 
-        self.iterations, self.nb_tr_steps, self.tr_loss = 0, 0, 0
+        
         self.best_dev_acc, self.unimproved_iters = -1, 0
         self.early_stop = False
         optimizer, scheduler = self.prepare_opt_sch( args)
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.global_step = 0
+        self.epoch_losses = []
 
 
     def prepare_opt_sch(self, args):
@@ -75,7 +73,7 @@ class BertTrainer(object):
             * args.epochs
         )
         param_optimizer = list(self.model.named_parameters())
-        no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
+        no_decay = ["bias", "LayerNorm.weight"]
         optimizer_grouped_parameters = [
             {
                 "params": [
@@ -93,9 +91,8 @@ class BertTrainer(object):
 
         optimizer = AdamW(
             optimizer_grouped_parameters,
-            lr=args.lr,
-            weight_decay=0.01,
-            correct_bias=False,
+            lr=args.learning_rate,
+            eps=args.adam_epsilon
         )
         scheduler = get_linear_schedule_with_warmup(
             optimizer,
@@ -103,76 +100,95 @@ class BertTrainer(object):
             num_warmup_steps=args.warmup_proportion * num_train_optimization_steps,
         )
         return optimizer, scheduler 
+    def _get_inputs_dict(self, batch):
+        device = self.device
+      
+        pad_token_id = self.tokenizer.pad_token_id
+        input_ids, attention_mask, decoder_input_ids = batch[0], batch[1], batch[2]
+        
+        # _decoder_input_ids = decoder_input_ids[:, :-1].contiguous()
+        _decoder_input_ids = shift_tokens_right(decoder_input_ids, pad_token_id)
+
+        
+        lm_labels = decoder_input_ids[:, :].clone()
+        lm_labels[lm_labels[:, :] == pad_token_id] = -100
+
+        inputs = {
+            "input_ids": input_ids.to(device),
+            "attention_mask": attention_mask.to(device),
+            "decoder_input_ids": _decoder_input_ids.to(device),
+            # "decoder_attention_mask" : decoder_attention_mask.to(device),
+            "labels": lm_labels.to(device),
+        }
+        return inputs
 
     def train_epoch(self, train_dataloader,epoch_number):
-        self.tr_loss = 0
-        train_losses = []
+        tr_loss = 0
+        
 
         batch_iterator = tqdm(
             train_dataloader,
-            desc=f"Running Epoch {epoch_number+1} of {self.args.epochs} ",
+            desc=f"Running Epoch {epoch_number} of {self.args.epochs} ",
             mininterval=0,
         )
        
         
-        for step, batch in enumerate(train_dataloader):
-            self.model.train()
-           
-            inputs = get_inputs_dict(batch,self.device)         
-            # decoder_input_ids = inputs['decoder_input_ids']
-            # _decoder_input_ids = shift_tokens_right(decoder_input_ids, self.model.config.pad_token_id) 
-            inputs['decoder_input_ids'] = shift_tokens_right(inputs['decoder_input_ids'], self.model.config.pad_token_id)         
-            outputs = self.model.model(**inputs)
-          
-            # print(outputs[0].shape)#torch.Size([4, 36, 1024]) 
-            # print(self.model.shared.weight.shape)#torch.Size([50265, 1024])
-            # print(self.final_logits_bias.shape)#torch.Size([1, 50265])
+        for step, batch in enumerate(batch_iterator):          
+            inputs = self._get_inputs_dict( batch )   
+            
+            outputs = self.model(**inputs)
+            loss = outputs[0]
+            args = self.args
+            
+            #outputs = self.model.model(**inputs)
+            # print(outputs[0].shape)#torch.Size([4, 36, 768]) 
+            # print(self.model.model.shared.weight.shape)#torch.Size([50265, 768])
+            # print(self.model.final_logits_bias.shape)#torch.Size([1, 50265])
 
-            lm_logits = F.linear(outputs[0], self.model.model.shared.weight, bias=self.model.final_logits_bias)
+            # lm_logits = F.linear(outputs[0], self.model.model.shared.weight, bias=self.model.final_logits_bias)
        
-            loss_fct = nn.CrossEntropyLoss(reduction="sum", ignore_index=self.model.config.pad_token_id)
-            loss = loss_fct(lm_logits.view(-1, self.model.config.vocab_size),
-                              inputs['decoder_input_ids'].view(-1))
+            # loss_fct = nn.CrossEntropyLoss(reduction="sum", ignore_index=self.model.config.pad_token_id)
+            # loss = loss_fct( lm_logits.view(-1, self.model.config.vocab_size), inputs['decoder_input_ids'].view(-1) )
             
-            
-            # # model outputs are always tuple in pytorch-transformers (see doc)
-            # loss = outputs[0]
-            # print(type(loss))
-            # # with open('ouput.txt','w') as f:
-            # #     f.write(str(outputs))
-            # # print('loss.item():',loss)
-            # current_loss = loss.item()
+           
             if self.args.n_gpu > 1:
                 loss = loss.mean()
+            
+            current_loss = loss.item()
+            
+            batch_iterator.set_description(
+                f"Batch Running Loss: {current_loss:9.4f}"
+            )
+            
+
             if self.args.gradient_accumulation_steps > 1:
                 loss = loss / self.args.gradient_accumulation_steps
             
-            batch_iterator.set_description(
-                f"Epochs {epoch_number}/{self.args.epochs}. Running Loss: {loss:9.4f}"
-            )
+            loss.backward() 
+            tr_loss += loss.item()
 
-
-            
-            train_losses.append(loss.detach().cpu())
-            loss.backward()           
-            self.nb_tr_steps += 1
             if (step + 1) % self.args.gradient_accumulation_steps == 0:
                 self.optimizer.step()
                 self.scheduler.step()
-                self.optimizer.zero_grad()
-                self.iterations += 1
+                self.model.zero_grad()
+                self.global_step += 1
+        
+        
+        self.epoch_losses.append(tr_loss)
+            
+
+
 
         # print(train_losses)
 
     def train(self):
-        # train_features = convert_examples_to_features(
-        #     self.train_examples, self.args.max_input_length, self.args.max_output_length, self.tokenizer
-        # )
-
-          
+         
+        self.model.train()
+            
         print("Number of train examples: ", len(self.train_examples))
         print("Batch size:", self.args.batch_size)
         print("Num of steps:", self.num_train_optimization_steps)
+        args = self.args
        
         train_dataloader = create_dataloader(
             self.train_examples, 
@@ -182,8 +198,10 @@ class BertTrainer(object):
             self.args.max_output_length, 
             isTraining=True)
     
-      
-        for epoch in tqdm(range(self.args.epochs), file=sys.stdout, desc="Epoch"):
+        train_iterator = tqdm(range(self.args.epochs), file=sys.stdout, desc="Epoch")
+        
+        for epoch in train_iterator:
+            train_iterator.set_description(f"Epoch {epoch } of {args.epochs}")
             self.train_epoch(train_dataloader,epoch)
 
             dev_evaluator = BertEvaluator(

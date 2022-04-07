@@ -17,12 +17,12 @@ python src/evaluation/eval_webquestion.py \
 --base_model $BASE_MODEL \
 --tokenizer $BASE_MODEL  \
 --model $MODEL  \
---batch_size 16 \
---eval_batch_size 16 \
---lr $LR   \
+--batch_size 2 \
+--eval_batch_size 2 \
+--learning_rate $LR   \
 --pretrain_epoch 0 \
---epochs 10 \
---repeat_runs 5 \
+--epochs 2 \
+--repeat_runs 2 \
 --temperature $T \
 --output_dir  $OUTPUT_DIR  \
 --cuda \
@@ -30,3 +30,4 @@ python src/evaluation/eval_webquestion.py \
 #bash src/evaluation/run.sh
 #sudo wg-quick up tw
 # git remote set-url origin https://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@github.com/LRY1994/knowledge-infusion.git/
+

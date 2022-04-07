@@ -1,4 +1,5 @@
 import pandas as pd
+import json
 import torch
 from torch.utils.data import DataLoader, RandomSampler, TensorDataset, SequentialSampler
 from .abstract_processor import BertProcessor, InputExample
@@ -14,7 +15,7 @@ def read_data_source_target(file_name_source, file_name_target):
         raise ValueError(
             "The length of the source file should be equal to target file"
         )
-    length = len(source)
+    length = 100 #len(source)
     source_target_pair = [[ source[i], target[i]] for i in range(length)] # "" for "prefix" used in t5_util.py
     data_df = pd.DataFrame(source_target_pair, columns=[ "input_text", "target_text"])
     return data_df
@@ -38,10 +39,16 @@ def convert_examples_to_features(
     """
     print ("Start tokenizing...")
 
-    questions = [d.input_text.replace('\\n','')  for d in examples]  
-    answers = [d.target_text.replace('\\n','') for d in examples]
+    questions = [d.input_text.replace('\n','')  for d in examples] 
+    answers = [d.target_text.replace('\n','') for d in examples]
 
-    # print(len(answers))
+    # print(examples[0].target_text)
+    # print('questions[0]:',questions[0])
+    # print('answers[0]:',answers[0])
+    # print('answers[0]:',len(answers[0]))
+
+
+    
     # answers, metadata = self.flatten(answers)
     if do_lowercase:
         questions = [question.lower() for question in questions]
@@ -49,19 +56,25 @@ def convert_examples_to_features(
     if append_another_bos:
         questions = ["<s> "+question for question in questions]
         answers = ["<s> " +answer for answer in answers]
+    
+    
+    # print('questions[0],answers[0]:',questions[0],answers[0])
     question_input = tokenizer.batch_encode_plus(questions,
-                                                padding='max_length',
-                                                max_length=max_input_length,
-                                                truncation=True
+                                                pad_to_max_length=True, 
+                                                max_length=max_input_length ,
+                                                truncation=True,
+                                                return_tensors="pt"
                                                 )
     answer_input = tokenizer.batch_encode_plus(answers,                                           
-                                                padding=True,  
-                                                max_length=max_output_length,                                          
-                                                truncation=True
+                                                pad_to_max_length=True, 
+                                                max_length=max_output_length, 
+                                                truncation=True,
+                                                return_tensors="pt"
                                                 )
 
     input_ids, attention_mask = question_input["input_ids"], question_input["attention_mask"]
     decoder_input_ids, decoder_attention_mask = answer_input["input_ids"], answer_input["attention_mask"]
+
 
     # preprocessed_data = [input_ids, attention_mask,
     #                                  decoder_input_ids, decoder_attention_mask,
@@ -79,17 +92,7 @@ def convert_examples_to_features(
         'decoder_attention_mask':decoder_attention_mask
     }
 
-def get_inputs_dict(batch,device):     
-    inputs = {
-        'input_ids':batch[0].to(device),#torch.Size([4, 512])
-        'attention_mask':batch[1].to(device),#torch.Size([4, 512])
-        'encoder_outputs':None,
-        'decoder_input_ids':batch[2].to(device),#torch.Size([4, 512])
-        'decoder_attention_mask':batch[3].to(device),#torch.Size([4, 512])
-        'decoder_cached_states':None,
-        'use_cache':False            
-    }
-    return inputs
+
 
 def create_dataloader(examples, tokenizer, batch_size, max_input_length, max_output_length, isTraining=False):
     features = convert_examples_to_features(
@@ -97,19 +100,15 @@ def create_dataloader(examples, tokenizer, batch_size, max_input_length, max_out
         max_input_length, 
         max_output_length, 
         tokenizer,
-        do_lowercase=True,
-        append_another_bos=True
+        do_lowercase=False,
+        append_another_bos=False
     )       
-    padded_input_ids = torch.LongTensor(features['input_ids'])
-    padded_attention_mask = torch.LongTensor(features['attention_mask'])
-    padded_decoder_input_ids= torch.LongTensor(features['decoder_input_ids'])
-    padded_decoder_attention_mask= torch.LongTensor(features['decoder_attention_mask'])
-
+    
     dataset = TensorDataset(
-        padded_input_ids, 
-        padded_attention_mask, 
-        padded_decoder_input_ids,
-        padded_decoder_attention_mask
+        torch.LongTensor(features['input_ids']) ,
+        torch.LongTensor(features['attention_mask']),
+        torch.LongTensor(features['decoder_input_ids']),
+        torch.LongTensor(features['decoder_attention_mask'])
     )
 
     if isTraining: 

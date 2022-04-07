@@ -69,7 +69,9 @@ def get_args():
     parser.add_argument("--patience", type=int, default=5)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--eval_batch_size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=0.00001)
+    parser.add_argument("--learning_rate", type=float, default=1e-5)
+    parser.add_argument("--adam_epsilon", default=1e-8, type=float,
+                        help="Epsilon for Adam optimizer.")
     parser.add_argument("--groups", type=str, default=None, help="groups to be chosen")
 
     parser.add_argument("--data_dir", default=None)
@@ -103,13 +105,13 @@ def get_args():
         help="Number of updates steps to accumulate before performing a backward/update pass",
     )
 
-    parser.add_argument('--num_beams', type=int, default=4)
-    parser.add_argument('--length_penalty', type=int, default=4)
+    parser.add_argument('--num_beams', type=int, default=1)
+    parser.add_argument('--length_penalty', type=float, default=2.0)
     parser.add_argument('--early_stopping', type=bool, default=True)
-    parser.add_argument('--repetition_penalty', type=int, default=4)
-    parser.add_argument('--do_sample', type=int, default=4)
-    parser.add_argument('--top_k', type=int, default=4)
-    parser.add_argument('--top_p', type=int, default=4)
+    parser.add_argument('--repetition_penalty', type=float, default=1.0)
+    parser.add_argument('--do_sample', type=bool, default=False)
+    parser.add_argument('--top_k', type=float, default=None)
+    parser.add_argument('--top_p', type=float, default=None)
     parser.add_argument('--num_return_sequences', type=int, default=1)
     parser.add_argument('--use_multiprocessed_decoding', type=bool, default=False)
 
@@ -319,7 +321,7 @@ if __name__ == "__main__":
     tokenizer = BartTokenizer.from_pretrained(args.base_model)
 
     for i in range(args.repeat_runs):
-        print(f"************************************************************************Start the {i}th/{args.repeat_runs}(args.repeat_runs) training.***********************************************************************")
+        print(f"***********************Start the {i}th/{args.repeat_runs}(args.repeat_runs) training.***************************")
         # Set random seed for reproducibility
         seed = int(time.time())
         print(f"Generate random seed {seed}.")

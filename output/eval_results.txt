@@ -1,0 +1,3 @@
+correct_num = 0
+correct_ratio = 0.0
+eval_loss = 7.027251601219177

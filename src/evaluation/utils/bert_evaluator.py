@@ -12,7 +12,7 @@ from tqdm import tqdm
 from torch import Tensor, nn
 from multiprocessing import Pool, cpu_count
 # from .abstract_processor import convert_examples_to_features
-from utils.bioasq_processor import get_inputs_dict,create_dataloader
+from utils.bioasq_processor import create_dataloader
 import logging
 import re
 import string
@@ -35,6 +35,24 @@ class BertEvaluator(object):
         if (split == 'train'): self.eval_examples = self.processor.get_train_examples()
         if (split == 'test'): self.eval_examples = self.processor.get_test_examples()
 
+    def _get_inputs_dict(self, batch):
+        device = self.device
+      
+        pad_token_id = self.tokenizer.pad_token_id
+        input_ids, attention_mask, decoder_input_ids = batch[0], batch[1], batch[2]
+        
+ 
+        lm_labels = decoder_input_ids[:, :].clone()
+        lm_labels[lm_labels[:, :] == pad_token_id] = -100
+
+        inputs = {
+            "input_ids": input_ids.to(device),
+            "attention_mask": attention_mask.to(device),
+            "decoder_input_ids": decoder_input_ids.to(device),
+            # "decoder_attention_mask" : decoder_attention_mask.to(device),
+            "labels": lm_labels.to(device),
+        }
+        return inputs
 
     def get_scores(self, silent=False,verbose=True,**kwargs):
         """
@@ -58,25 +76,29 @@ class BertEvaluator(object):
         
         for batch in tqdm( eval_dataloader, desc="Evaluating", disable=silent): 
 
-            inputs = get_inputs_dict(batch,self.device) 
-            decoder_input_ids = inputs['decoder_input_ids']
-            
-          
+            inputs = self._get_inputs_dict( batch ) 
+         
             with torch.no_grad():
-                outputs = self.model.model(**inputs)
-                lm_logits = F.linear(outputs[0], self.model.model.shared.weight, bias=self.model.final_logits_bias)
+                outputs = self.model(**inputs)
+                loss = outputs[0]
+                eval_loss += loss.mean().item()
+            nb_eval_steps += 1
         
-                loss_fct = nn.CrossEntropyLoss(reduction="sum", ignore_index=self.model.config.pad_token_id)
-                loss = loss_fct(lm_logits.view(-1, self.model.config.vocab_size),
-                              decoder_input_ids.view(-1))
+        
+
+                # outputs = self.model.model(**inputs)
+                # lm_logits = F.linear(outputs[0], self.model.model.shared.weight, bias=self.model.final_logits_bias)
+        
+                # loss_fct = nn.CrossEntropyLoss(reduction="sum", ignore_index=self.model.config.pad_token_id)
+                # loss = loss_fct(lm_logits.view(-1, self.model.config.vocab_size),decoder_input_ids.view(-1))
                            
 
-            if self.args.n_gpu > 1:
-                loss = loss.mean()
-            if self.args.gradient_accumulation_steps > 1:
-                loss = loss / self.args.gradient_accumulation_steps
-            eval_loss += loss      
-            nb_eval_steps += 1
+            # if self.args.n_gpu > 1:
+            #     loss = loss.mean()
+            # if self.args.gradient_accumulation_steps > 1:
+            #     loss = loss / self.args.gradient_accumulation_steps
+            # eval_loss += loss      
+            # nb_eval_steps += 1
 
         # loss       
         eval_loss = eval_loss / nb_eval_steps
@@ -84,15 +106,15 @@ class BertEvaluator(object):
         # accuracy
         result , preds = self.inference(self.eval_examples)
         results.update(result)# {correct_num, correct_ratio}
-        target_text = [d.target_text.replace('\\n','') for d in self.eval_examples]
+        target_text = [d.target_text.replace('\n','') for d in self.eval_examples]
         result = self.compute_metrics(target_text, preds, **kwargs)
         results.update(result)# metrics
 
-        output_eval_file = os.path.join(self.args.output_dir, "eval_results.txt")
-        os.makedirs(self.args.output_dir, exist_ok=True)
-        with open(output_eval_file, "w") as writer:
-            for key in sorted(results.keys()):
-                writer.write("{} = {}\n".format(key, str(results[key])))
+        # output_eval_file = os.path.join(self.args.output_dir, "eval_results.txt")
+        # os.makedirs(self.args.output_dir, exist_ok=True)
+        # with open(output_eval_file, "w") as writer:
+        #     for key in sorted(results.keys()):
+        #         writer.write("{} = {}\n".format(key, str(results[key])))
 
         print(results)
 
@@ -111,9 +133,11 @@ class BertEvaluator(object):
         Returns:
             preds: A python list of the generated sequences.
         """  # noqa: ignore flake8"      
-        to_predict = [d.input_text.replace('\\n','') for d in pred_data]
-        target_predict = [d.target_text.replace('\\n','') for d in pred_data]#groundtruth
+        to_predict = [d.input_text.replace('\n','') for d in pred_data]
+        target_predict = [d.target_text.replace('\n','') for d in pred_data]#groundtruth
         assert len(to_predict)==len(target_predict)
+        # print('to_predict:',to_predict[0])
+        # print('target_predict:',target_predict[0])
 
         
         if not output_dir:
@@ -141,17 +165,16 @@ class BertEvaluator(object):
           
             outputs = self.model.generate(
                 input_ids=input_ids.to(self.device) ,
-                attention_mask=attention_mask.to(self.device) ,
+                # attention_mask=attention_mask.to(self.device) ,
                 num_beams=self.args.num_beams,
-                max_length=self.args.max_output_length,
-                early_stopping=True
-                # length_penalty=self.args.length_penalty,
-                # early_stopping=self.args.early_stopping,
-                # repetition_penalty=self.args.repetition_penalty,
-                # do_sample=self.args.do_sample,
-                # top_k=self.args.top_k,
-                # top_p=self.args.top_p,
-                # num_return_sequences=self.args.num_return_sequences,
+                max_length=self.args.max_output_length,            
+                length_penalty=self.args.length_penalty,
+                early_stopping=self.args.early_stopping,
+                repetition_penalty=self.args.repetition_penalty,
+                do_sample=self.args.do_sample,
+                top_k=self.args.top_k,
+                top_p=self.args.top_p,
+                num_return_sequences=self.args.num_return_sequences
             )
             
             all_outputs.extend(outputs.cpu().numpy())
@@ -177,16 +200,25 @@ class BertEvaluator(object):
         correct_num = 0
 
         with open(output_predication_file, "w", encoding="utf8", errors="ignore") as writer:
-            writer.write("to_predict\n\toutput\n\ttarget(groundtruth)\n")
+            writer.write("to_predict\n\toutput\n\ttarget\n\tnomalize_output\n\tnomalize_target\n\t\EM\n")
             for i in range(len(outputs)):
                 outputs[i] = outputs[i].strip()
-                writer.write(to_predict[i]+"\t"+outputs[i]+"\n\t"+target_predict[i])
-                prediction = outputs[i].strip()
+                
+                prediction = normalize_answer(outputs[i].strip())
                 groudtruth = target_predict[i].strip().split('\t')
-
-                if get_exact_match(prediction, groudtruth):
-                    print(prediction+'\n'+str(groudtruth))
+                groudtruth = [normalize_answer(g) for g in groudtruth]
+                
+                flag = False
+                if prediction in groudtruth:
+                    # print(prediction +'\n'+str(groudtruth))
                     correct_num += 1
+                    flag = True
+                    
+                writer.write(to_predict[i]+"\n\t"+outputs[i]+"\n\t"+target_predict[i]+"\n\t"+prediction+"\n\t"+str(groudtruth)+"\n\t"+str(flag) +"\n\n")
+
+                # if get_exact_match(prediction, groudtruth):
+                #     print(prediction+'\n'+str(groudtruth))
+                #     correct_num += 1
 
         correct_ratio = correct_num/float(len(outputs))
     
