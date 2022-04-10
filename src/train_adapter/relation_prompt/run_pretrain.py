@@ -25,7 +25,7 @@ from utils.kg_processor import  KGProcessor_prompt
 from model import RelPrompt
 
 # 1. Start a W&B run
-wandb.init(project="Entity prediction with partition")
+# wandb.init(project="Entity prediction with partition")
 
 
 from argparse import ArgumentParser
@@ -134,6 +134,14 @@ def get_args():
         default=1,
         help="Number of updates steps to accumulate before performing a backward/update pass",
     )
+    parser.add_argument(
+        "--triple_per_relation",
+        type=int,
+        default=1000,
+        help="Number of triple of one relation",
+    )
+  
+
     args = parser.parse_args()
     return args
 
@@ -213,9 +221,7 @@ def init_model(args, relid=None):
 if __name__ == "__main__":
     # Set default configuration in args.py
     args = get_args()
-    # args.cuda = True
-    device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
-    # device = 'cuda'
+    device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")  
     n_gpu = torch.cuda.device_count() if args.cuda else 0
 
 
@@ -271,7 +277,7 @@ if __name__ == "__main__":
     )
     if args.tokenizer is None:
         args.tokenizer = args.model
-    wandb.config.update(args)
+    # wandb.config.update(args)
 
     
     tokenizer = AutoTokenizer.from_pretrained(args.tokenizer) 
@@ -283,7 +289,7 @@ if __name__ == "__main__":
     for group_idx in range(args.n_partition):
         if group_idx != 0 and args.non_sequential:
             model, optimizer = init_model(args, relations[group_idx])
-        wandb.watch(model)
+        # wandb.watch(model)
         trainer = BertTrainer(model, optimizer, data_processor, tokenizer, args)
         if args.cache_token_encodings:
             trainer.train_subgraph_cache_tokens(group_idx)

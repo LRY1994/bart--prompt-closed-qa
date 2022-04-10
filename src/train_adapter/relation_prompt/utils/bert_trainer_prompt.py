@@ -78,7 +78,7 @@ class BertTrainer(object):
             label_index = torch.arange(query_embed1.size(0))
             label_index = torch.cat([label_index, label_index], dim=0)
             loss = self.loss(query_embed, label_index)
-            wandb.log({"loss": loss})
+            # wandb.log({"loss": loss})
             # if "roberta" in self.tokenizer.name_or_path:
             #     logits = logits[
             #         :, 0, :

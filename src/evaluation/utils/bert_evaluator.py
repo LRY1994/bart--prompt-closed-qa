@@ -196,7 +196,7 @@ class BertEvaluator(object):
                 for output_id in all_outputs
             ]
 
-        output_predication_file = os.path.join(output_dir, "predictions_{}.txt".format(suffix))
+        output_predication_file = os.path.join(output_dir, "{}_predictions.txt".format(self.args.dataset))
         correct_num = 0
 
         with open(output_predication_file, "w", encoding="utf8", errors="ignore") as writer:

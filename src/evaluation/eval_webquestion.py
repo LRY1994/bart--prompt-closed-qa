@@ -44,8 +44,9 @@ def get_args():
         required=True,
         help="three modes:  adapter, base",
     )
-    parser.add_argument("--model", default=None, type=str, required=True)
+   
     parser.add_argument("--base_model", default=None, type=str, required=True)
+    parser.add_argument("--dataset", default=None, type=str, required=True)
     parser.add_argument("--output_dir", default=None, type=str, required=True)
     parser.add_argument("--tokenizer", default=None, type=str, required=False)
     parser.add_argument("--cuda", action="store_true", help="to use gpu")
@@ -156,20 +157,13 @@ def search_adapters(args):
         [dict]: {model_path:[adapter_names]}
     """
     adapter_paths_dic = {}
-    if "," in args.model:
-        for model in args.model.split(","):  # need to fusion from two or more models
-            model_path = args.model_dir + model
-            adapter_paths = [f for f in listdir(model_path)]
-            print(f"Found {len(adapter_paths)} adapter paths")
-            adapter_paths = check_adapter_names(model_path, adapter_paths)
-            adapter_paths_dic[model_path] = adapter_paths
-    else:
-        model_path = args.model_dir + args.model
-        adapter_paths = [f for f in listdir(model_path)]
-        print(f"Found {len(adapter_paths)} adapter paths")
-        # model_path父目录, adapter_paths adpter.json
-        adapter_paths = check_adapter_names(model_path, adapter_paths)
-        adapter_paths_dic[model_path] = adapter_paths
+   
+    model_path = args.model_dir 
+    adapter_paths = [f for f in listdir(model_path)]
+    print(f"Found {len(adapter_paths)} adapter paths")
+    # model_path父目录, adapter_paths adpter.json
+    adapter_paths = check_adapter_names(model_path, adapter_paths)
+    adapter_paths_dic[model_path] = adapter_paths
     return adapter_paths_dic
 
 
@@ -233,17 +227,6 @@ def load_fusion_adapter_model(args,base_model):
     return config, base_model
 
 
-def load_adapter_model(args):
-    model_path = os.path.join(args.model_dir, args.model)
-    base_model = AutoModel.from_pretrained(args.base_model, from_tf=get_tf_flag(args))
-    adapter_config = AdapterConfig.load(os.path.join(model_path, "adapter_config.json"))
-    config = AutoConfig.from_pretrained(os.path.join(model_path, "adapter_config.json"))
-    base_model.load_adapter(model_path, config=adapter_config)
-    print(f"Load adapter:{config.name}")
-    base_model.set_active_adapters([config.name])
-    return config, base_model
-
-
 if __name__ == "__main__":
     
 
@@ -266,9 +249,7 @@ if __name__ == "__main__":
         "cuda" if (torch.cuda.is_available() and args.cuda) else "cpu"
     )
     n_gpu = torch.cuda.device_count()
-    model_str = args.model
-    if "/" in model_str:
-        model_str = model_str.split("/")[1]
+    
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     logger.info("Device: {} ".format(str(device).upper()))
@@ -312,7 +293,7 @@ if __name__ == "__main__":
         elif args.train_mode == "base":
             # use base bart model
             config = BartConfig.from_pretrained(args.base_model) #AutoConfig.from_pretrained(args.base_model)
-            model = basemodel #AutoModel.from_pretrained(args.base_model, from_tf=get_tf_flag(args))
+            model = basemodel
 
         
 

@@ -11,7 +11,6 @@ from torch import Tensor, nn
 # from .abstract_processor import convert_examples_to_features
 from utils.bioasq_processor import create_dataloader
 from .bert_evaluator import BertEvaluator
-from transformers.modeling_bart import shift_tokens_right
 from transformers import (
     AdamW,
     get_linear_schedule_with_warmup
@@ -103,7 +102,7 @@ class BertTrainer(object):
         input_ids, attention_mask, decoder_input_ids = batch[0], batch[1], batch[2]
         
         # _decoder_input_ids = decoder_input_ids[:, :-1].contiguous()
-        _decoder_input_ids = shift_tokens_right(decoder_input_ids, pad_token_id)
+        # _decoder_input_ids = shift_tokens_right(decoder_input_ids, pad_token_id)
 
         
         lm_labels = decoder_input_ids[:, :].clone()
@@ -112,7 +111,7 @@ class BertTrainer(object):
         inputs = {
             "input_ids": input_ids.to(device),
             "attention_mask": attention_mask.to(device),
-            "decoder_input_ids": _decoder_input_ids.to(device),
+            "decoder_input_ids": decoder_input_ids.to(device),
             # "decoder_attention_mask" : decoder_attention_mask.to(device),
             "labels": lm_labels.to(device),
         }
