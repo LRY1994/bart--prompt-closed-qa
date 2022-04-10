@@ -1,3 +1,4 @@
+from email.mime import base
 import os
 import random
 import shutil
@@ -131,19 +132,19 @@ def evaluate_split(model, processor, tokenizer, args, logger,split="dev"):
 
 def get_tf_flag(args):
     from_tf = False
-    if (
-        (
-            ("BioRedditBERT" in args.model)
-            or ("BioBERT" in args.model)
-            or ("SapBERT" in args.model)
-        )
-        and "step_" not in args.model
-        and "epoch_" not in args.model
-    ):
-        from_tf = True
+    # if (
+    #     (
+    #         ("BioRedditBERT" in args.model)
+    #         or ("BioBERT" in args.model)
+    #         or ("SapBERT" in args.model)
+    #     )
+    #     and "step_" not in args.model
+    #     and "epoch_" not in args.model
+    # ):
+    #     from_tf = True
 
-    if ("SapBERT" in args.model) and ("original" in args.model):
-        from_tf = False
+    # if ("SapBERT" in args.model) and ("original" in args.model):
+    #     from_tf = False
     return from_tf
 
 
@@ -158,8 +159,8 @@ def search_adapters(args):
     """
     adapter_paths_dic = {}
    
-    model_path = args.model_dir 
-    adapter_paths = [f for f in listdir(model_path)]
+    model_path = args.model_dir  # checkpoints/roberta-base_20220411_001827_adapter
+    adapter_paths = [f for f in listdir(model_path)]#[group_0_epoch_0,xxx]
     print(f"Found {len(adapter_paths)} adapter paths")
     # model_path父目录, adapter_paths adpter.json
     adapter_paths = check_adapter_names(model_path, adapter_paths)
@@ -179,15 +180,15 @@ def check_adapter_names(model_path, adapter_names):
     """
     checked_adapter_names = []
     print(f"Checking adapter namer:{model_path}:{len(adapter_names)}")
-    for adapter_name in adapter_names:  # group_0_epoch_1
-        adapter_model_path = os.path.join(model_path, adapter_name)
+    for adapter_name in adapter_names:  
+        adapter_model_path = os.path.join(model_path, adapter_name) # checkpoints/roberta-base_20220411_001827_adapter/group_0_epoch_0
         if f"epoch_{args.pretrain_epoch}" not in adapter_name:
             # check pretrain_epoch
             continue
         if args.groups and int(adapter_name.split("_")[1]) not in set(args.groups):
             # check selected groups
             continue
-        adapter_model_path = os.path.join(adapter_model_path, "pytorch_adapter.bin")
+        adapter_model_path = os.path.join(adapter_model_path, "pytorch_adapter.bin") 
         assert os.path.exists(
             adapter_model_path
         ), f"{adapter_model_path} adapter not found."
@@ -200,6 +201,7 @@ def check_adapter_names(model_path, adapter_names):
 
 
 def load_fusion_adapter_model(args,base_model):
+    # print(base_model)
     """Load fusion adapter model.
 
     Args:
@@ -213,10 +215,13 @@ def load_fusion_adapter_model(args,base_model):
     for model_path, adapter_names in adapter_names_dict.items():
         for adapter_name in adapter_names:
             adapter_dir = os.path.join(model_path, adapter_name)
-            new_adapter_name = model_path[-14:][:-8] + "_" + adapter_name
-            base_model.load_adapter(adapter_dir, load_as=new_adapter_name)
-            print(f"Load adapter:{new_adapter_name}")
+            new_adapter_name = model_path[-14:][:-8] + "_" + adapter_name  
+            print('before')        
+            base_model.load_adapter(adapter_dir, load_as=new_adapter_name)###这里有问题
+            print('after')
             fusion_adapter_rename.append(new_adapter_name)
+
+    # print("fusion_adapter_rename:",fusion_adapter_rename)
     fusion_config = AdapterFusionConfig.load("dynamic", temperature=args.temperature)
     base_model.add_fusion(fusion_adapter_rename, fusion_config)
     base_model.set_active_adapters(fusion_adapter_rename)
@@ -289,7 +294,7 @@ if __name__ == "__main__":
             torch.cuda.manual_seed_all(seed)
         if args.train_mode == "fusion":
             # args.base_model will be a folder of pre-trained models over partitions
-            config, model = load_fusion_adapter_model(args,basemodel)
+            config, model = load_fusion_adapter_model(args, basemodel)
         elif args.train_mode == "base":
             # use base bart model
             config = BartConfig.from_pretrained(args.base_model) #AutoConfig.from_pretrained(args.base_model)

@@ -24,7 +24,7 @@ python src/train_adapter/relation_prompt/run_pretrain.py \
 --lr 1e-04 \
 --epochs 2 \
 --save_step 2000 \
---triple_per_relation $TRIPLE_PER_RELATION
-
+--triple_per_relation $TRIPLE_PER_RELATION \
+--pretrain_epoch 0 
 
 #bash src/train_adapter/relation_prompt/train_wiki_roberta.sh

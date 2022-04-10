@@ -185,9 +185,6 @@ def init_model(args, relid=None):
         model = torch.nn.DataParallel(model)
 
     param_optimizer = list(model.named_parameters())
-    # for n, p in param_optimizer:
-    #     if p.requires_grad:
-    #         print(n)
     no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
         {
@@ -286,11 +283,13 @@ if __name__ == "__main__":
     rel_names = list(map(data_processor.id2rel.get, data_processor.top_rel))
     relations = tokenizer(rel_names, add_special_tokens=False, add_prefix_space=True)['input_ids']
     model, optimizer = init_model(args, relations[0])
+
     for group_idx in range(args.n_partition):
         if group_idx != 0 and args.non_sequential:
             model, optimizer = init_model(args, relations[group_idx])
         # wandb.watch(model)
         trainer = BertTrainer(model, optimizer, data_processor, tokenizer, args)
+        
         if args.cache_token_encodings:
             trainer.train_subgraph_cache_tokens(group_idx)
         else:

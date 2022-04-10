@@ -2,7 +2,7 @@ DATASET="WebQuestion"
 # TriviaQA
 # NaturalQuestions
 # SQuAD2
-MODEL_DIR="src/train_adapter/relation_prompt/checkpoints/"
+MODEL_DIR="src/train_adapter/relation_prompt/checkpoints/roberta-base_20220411_001827_adapter"
 DATA_DIR="/home/simon/datasets/WebQuestion/splitted/"
 BASE_MODEL="facebook/bart-base"
 T=1
