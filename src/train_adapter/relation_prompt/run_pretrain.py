@@ -282,8 +282,8 @@ if __name__ == "__main__":
     
     rel_names = list(map(data_processor.id2rel.get, data_processor.top_rel))
     relations = tokenizer(rel_names, add_special_tokens=False, add_prefix_space=True)['input_ids']
+    
     model, optimizer = init_model(args, relations[0])
-
     for group_idx in range(args.n_partition):
         if group_idx != 0 and args.non_sequential:
             model, optimizer = init_model(args, relations[group_idx])

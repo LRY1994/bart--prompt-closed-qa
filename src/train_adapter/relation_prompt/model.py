@@ -66,14 +66,14 @@ class RelPrompt(RobertaForMaskedLM):
             input_ids=None,
             mode='query'
     ):
-        
-        ent_embedding = self.roberta.embeddings.word_embeddings(input_ids)  # batch x n_word_nodes x hidden_size
+        # word_embeddings 会自动加上一个终止符，
+        ent_embedding = self.roberta.embeddings.word_embeddings(input_ids)  # (batch ,n_word_nodes , hidden_size)
 
         if mode == 'query':
-            prompt_embed = self.prompt.expand(ent_embedding.shape[0], self.prompt_length, ent_embedding.shape[2]).to(self.devices)
-            inputs_embeds = torch.cat([ent_embedding[:,:-2,:], prompt_embed, ent_embedding[:,-2:,:]],dim=1)  # batch x seq_len x hidden_size
+            prompt_embed = self.prompt.expand(ent_embedding.shape[0], self.prompt_length, ent_embedding.shape[2]).to(self.devices)# (batch , prompt_length , hidden_size)
+            inputs_embeds = torch.cat([ent_embedding[:,:-2,:], prompt_embed, ent_embedding[:,-2:,:]],dim=1)  # (batch , ent_h + prompt_length + （mask+END） , hidden_size) 
         else:
-            inputs_embeds = ent_embedding
+            inputs_embeds = ent_embedding # (batch ,n_word_nodes , hidden_size)
         # add the adapter_name here
         # how to deal with position_ids? set all as 0 or random position
         # prompt_attention_mask = self.extend_attention_mask(attention_mask)

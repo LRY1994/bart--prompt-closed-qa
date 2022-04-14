@@ -68,10 +68,10 @@ class BertTrainer(object):
                     sequence_output1 = self.model(**inputs)[0]
                     sequence_output2 = self.model(**labels)[0]
             else:
-                sequence_output1 = self.model(**inputs)[0]
-                sequence_output2 = self.model(**labels)[0]
-            query_embed1 = sequence_output1[:, 0]
-            query_embed2 = sequence_output2[:, 0]
+                sequence_output1 = self.model(**inputs)[0]  
+                sequence_output2 = self.model(**labels)[0] 
+            query_embed1 = sequence_output1[:, 0]#[CLS] head entity  + relation prompt + [MASK] 
+            query_embed2 = sequence_output2[:, 0]# [CLS]tail entity 
             query_embed = torch.cat([query_embed1, query_embed2], dim=0)
             # query_embed : [2 * batch_size, hidden]
 
@@ -129,8 +129,17 @@ class BertTrainer(object):
     
     # train_subgraph->train_epoch->train
     def train_subgraph(self, group_idx):
+        '''
+        InputExample(
+                    guid=None,
+                    text_e=text_h + '<mask>',
+                    text_r=text_r,
+                    label=text_t,
+                )
+        '''       
         def collate_fn_batch_encoding(batch):
             batch_text = [example.text_e for example in batch]
+            # text_h + '<mask>'
             text_features = self.tokenizer.batch_encode_plus(
                 batch_text,
                 padding="max_length",  # First sentence will have some PADDED tokens to match second sequence length
@@ -138,8 +147,8 @@ class BertTrainer(object):
                 return_tensors="pt",
                 truncation=True,
             )
-            labels = [example.label for example in batch]
-            # label_ids = self.tokenizer.batch_encode(labels)
+            #text_t        
+            labels = [example.label for example in batch]           
             label_features = self.tokenizer.batch_encode_plus(
                 labels,
                 padding="max_length",  # First sentence will have some PADDED tokens to match second sequence length
@@ -168,7 +177,7 @@ class BertTrainer(object):
                 label_features.attention_mask,
                 label_features.token_type_ids,
             )
-
+       
         examples = self.processor._create_examples(group_idx)
         self.num_train_optimization_steps = (
             int(

@@ -210,6 +210,7 @@ def load_fusion_adapter_model(args,base_model):
     Returns:
         [type]: [description]
     """
+    
     adapter_names_dict = search_adapters(args)
     fusion_adapter_rename = []
     for model_path, adapter_names in adapter_names_dict.items():

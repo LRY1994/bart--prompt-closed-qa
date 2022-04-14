@@ -34,6 +34,7 @@ class KGProcessor_prompt(BertProcessor):
         self.n_partition = n_partition
         self.triple_per_relation = triple_per_relation
         self.sub_set = sub_set
+        
        
         self.tri_file = os.path.join(data_dir, "wikidata5m_transductive_train.txt")
         self.ent_file = os.path.join(data_dir, "wikidata5m_entity.txt")
@@ -116,7 +117,7 @@ class KGProcessor_prompt(BertProcessor):
 
         ## Read Relation File
         with open(self.rel_file, "r") as f:
-            print("Read Relation File")
+            # print("Read Relation File")
             # self.rel_total = (int)(f.readline())  # num of total relations
             for rel in f.readlines():
                 self.id2rel[rel.split("\t")[0].strip()] = rel.split("\t")[1]
@@ -143,7 +144,7 @@ class KGProcessor_prompt(BertProcessor):
         f.close()
 
         self.top_rel = self.sample_triple(self.n_partition)
-        print([self.id2rel[r] for r in self.top_rel])
+        # print([self.id2rel[r] for r in self.top_rel])
         self.triple_list = {r: self.triple_list[r] for r in self.top_rel}
         tri_per_rel = self.triple_per_relation ###
         import random
