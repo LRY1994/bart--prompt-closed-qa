@@ -5,17 +5,17 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn.functional as F
-from sklearn import metrics
-from tabulate import tabulate
-from torch.utils.data import DataLoader, SequentialSampler, TensorDataset
+
+
 from tqdm import tqdm
-from torch import Tensor, nn
+
 from multiprocessing import Pool, cpu_count
 # from .abstract_processor import convert_examples_to_features
 from utils.bioasq_processor import create_dataloader
 import logging
 import re
 import string
+from transformers.models.bart.modeling_bart import shift_tokens_right
 # Suppress warnings from sklearn.metrics
 warnings.filterwarnings("ignore")
 
@@ -36,23 +36,37 @@ class BertEvaluator(object):
         if (split == 'test'): self.eval_examples = self.processor.get_test_examples()
 
     def _get_inputs_dict(self, batch):
-        device = self.device
+        # device = self.device
       
+        # pad_token_id = self.tokenizer.pad_token_id
+
+        # source_ids, source_mask, y = batch[0], batch[1], batch[2]
+        # y_ids = y[:, :-1].contiguous()
+        # lm_labels = y[:, 1:].clone()
+        # lm_labels[y[:, 1:] == pad_token_id] = -100       
+        # inputs = {         
+        #     "input_ids": source_ids.to(device),
+        #     "attention_mask": source_mask.to(device),
+        #     "decoder_input_ids": y_ids.to(device),
+        #     "labels": lm_labels.to(device),
+        # }
+        device = self.device
         pad_token_id = self.tokenizer.pad_token_id
+        decoder_start_token_id = self.model.config.decoder_start_token_id        
         input_ids, attention_mask, decoder_input_ids = batch[0], batch[1], batch[2]
-        
- 
+        _decoder_input_ids = shift_tokens_right(decoder_input_ids, pad_token_id,decoder_start_token_id)#关建
         lm_labels = decoder_input_ids[:, :].clone()
         lm_labels[lm_labels[:, :] == pad_token_id] = -100
 
         inputs = {
             "input_ids": input_ids.to(device),
             "attention_mask": attention_mask.to(device),
-            "decoder_input_ids": decoder_input_ids.to(device),
-            # "decoder_attention_mask" : decoder_attention_mask.to(device),
+            "decoder_input_ids": _decoder_input_ids.to(device),
             "labels": lm_labels.to(device),
         }
         return inputs
+
+        
 
     def get_scores(self, silent=False,verbose=True,**kwargs):
         """
@@ -165,16 +179,16 @@ class BertEvaluator(object):
           
             outputs = self.model.generate(
                 input_ids=input_ids.to(self.device) ,
-                # attention_mask=attention_mask.to(self.device) ,
-                num_beams=self.args.num_beams,
+                attention_mask=attention_mask.to(self.device) ,# 这个一定要加
+                # num_beams=self.args.num_beams,
                 max_length=self.args.max_output_length,            
-                length_penalty=self.args.length_penalty,
+                # length_penalty=self.args.length_penalty,
                 early_stopping=self.args.early_stopping,
-                repetition_penalty=self.args.repetition_penalty,
-                do_sample=self.args.do_sample,
-                top_k=self.args.top_k,
-                top_p=self.args.top_p,
-                num_return_sequences=self.args.num_return_sequences
+                # repetition_penalty=self.args.repetition_penalty,
+                # do_sample=self.args.do_sample,
+                # top_k=self.args.top_k,
+                # top_p=self.args.top_p,
+                # num_return_sequences=self.args.num_return_sequences
             )
             
             all_outputs.extend(outputs.cpu().numpy())
@@ -202,23 +216,26 @@ class BertEvaluator(object):
         with open(output_predication_file, "w", encoding="utf8", errors="ignore") as writer:
             writer.write("to_predict\n\toutput\n\ttarget\n\tnomalize_output\n\tnomalize_target\n\t\EM\n")
             for i in range(len(outputs)):
-                outputs[i] = outputs[i].strip()
-                
-                prediction = normalize_answer(outputs[i].strip())
+                prediction = outputs[i].strip()       
                 groudtruth = target_predict[i].strip().split('\t')
-                groudtruth = [normalize_answer(g) for g in groudtruth]
+                # groudtruth = [normalize_answer(g) for g in groudtruth]
                 
-                flag = -1
-                if prediction in groudtruth:
-                    # print(prediction +'\n'+str(groudtruth))
-                    correct_num += 1
-                    flag = 1
-                    
-                writer.write(to_predict[i]+"\n\t"+outputs[i]+"\n\t"+target_predict[i]+"\n\t"+prediction+"\n\t"+str(groudtruth)+"\n\t"+str(flag) +"\n\n")
-
-                # if get_exact_match(prediction, groudtruth):
-                #     print(prediction+'\n'+str(groudtruth))
+                
+                # if prediction in groudtruth:
+                #     print(prediction +'\n'+str(groudtruth))
                 #     correct_num += 1
+                #     flag = True
+                flag = False   
+                if get_exact_match(prediction, groudtruth):
+                    print(prediction+'\n'+str(groudtruth))
+                    correct_num += 1
+                    flag = True
+
+                writer.write(to_predict[i]+"\n\t"+prediction+"\n\t"+target_predict[i]+"\n\t"+str(flag) +"\n\n")
+                
+                    
+                # writer.write(to_predict[i]+"\n\t"+outputs[i]+"\n\t"+target_predict[i]+"\n\t"+prediction+"\n\t"+str(groudtruth)+"\n\t"+str(flag) +"\n\n")
+
 
         correct_ratio = correct_num/float(len(outputs))
     

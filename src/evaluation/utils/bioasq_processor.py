@@ -15,7 +15,7 @@ def read_data_source_target(file_name_source, file_name_target):
         raise ValueError(
             "The length of the source file should be equal to target file"
         )
-    length =  10 #len(source)
+    length =  100 #len(source)
     source_target_pair = [[ source[i], target[i]] for i in range(length)] # "" for "prefix" used in t5_util.py
     data_df = pd.DataFrame(source_target_pair, columns=[ "input_text", "target_text"])
     return data_df
@@ -27,7 +27,7 @@ def load_bioasq(data_dir):
     return train_df, dev_df, test_df
 
 def convert_examples_to_features(
-    examples, max_input_length,max_output_length ,tokenizer, do_lowercase=False,append_another_bos=False
+    examples, max_input_length,max_output_length ,tokenizer, do_lowercase=False,append_another_bos=True
 ):
     """
     Loads a data file into a list of InputBatch objects
@@ -42,7 +42,9 @@ def convert_examples_to_features(
     questions = [d.input_text.replace('\n','')  for d in examples] 
     answers = [d.target_text.replace('\n','') for d in examples]
 
+    # print(examples[0].input_text)
     # print(examples[0].target_text)
+
     # print('questions[0]:',questions[0])
     # print('answers[0]:',answers[0])
     # print('answers[0]:',len(answers[0]))
@@ -58,7 +60,7 @@ def convert_examples_to_features(
         answers = ["<s> " +answer for answer in answers]
     
     
-    # print('questions[0],answers[0]:',questions[0],answers[0])
+    print('questions[0],answers[0]:',questions[0],answers[0])
     question_input = tokenizer.batch_encode_plus(questions,
                                                 pad_to_max_length=True, 
                                                 max_length=max_input_length ,

@@ -10,21 +10,15 @@ from statistics import mean, stdev
 from xmlrpc.client import boolean
 import logging
 import numpy as np
+
 import torch
 from transformers import (
-    AdamW,
-    AdapterConfig,
     AdapterFusionConfig,
-    AutoConfig,
-    AutoModel,
-    AutoTokenizer,
+    AutoConfig, 
     BartConfig,
     BartForConditionalGeneration,
     BartTokenizer,
-    
-
 )
-from transformers import get_linear_schedule_with_warmup as WarmupLinearSchedule
 
 import wandb
 from utils.bert_evaluator import BertEvaluator
@@ -241,6 +235,7 @@ if __name__ == "__main__":
     #### Start writing logs
 
     log_filename = "log.txt"
+    os.makedirs(args.output_dir, exist_ok=True)
 
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
                     datefmt='%m/%d/%Y %H:%M:%S',
@@ -270,7 +265,6 @@ if __name__ == "__main__":
     args.device = device
     args.n_gpu = n_gpu
     
-    args.best_model_dir = f"./temp/model_{timestamp_str}/"
     # Record config on wandb
     # wandb.config.update(args)
     print_args_as_table(args)
@@ -288,7 +282,7 @@ if __name__ == "__main__":
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
-        args.best_model_dir = f"./temp/model_{seed}/"
+        args.best_model_dir = f"src/temp/model_{seed}/"
         os.makedirs(args.best_model_dir, exist_ok=True)
         basemodel = BartForConditionalGeneration.from_pretrained(args.base_model)
         if n_gpu > 0:
@@ -315,7 +309,9 @@ if __name__ == "__main__":
 
         # 只取最好的
         logger.info("***Evaluating Model(modal is set)***")
+        logger.info(f"load model from {args.best_model_dir}model.bin")
         model = torch.load(args.best_model_dir + "model.bin")
+     
 
 
         train_result = evaluate_split(model, processor, tokenizer, args, logger,split="train")

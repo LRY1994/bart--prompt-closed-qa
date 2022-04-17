@@ -11,6 +11,7 @@ from torch import Tensor, nn
 # from .abstract_processor import convert_examples_to_features
 from utils.bioasq_processor import create_dataloader
 from .bert_evaluator import BertEvaluator
+from transformers.models.bart.modeling_bart import shift_tokens_right
 from transformers import (
     AdamW,
     get_linear_schedule_with_warmup
@@ -26,9 +27,9 @@ class BertTrainer(object):
         self.train_examples = self.processor.get_train_examples()
         self.logger = logger
        
-        model_str = self.args.model
-        if "/" in model_str:
-            model_str = model_str.split("/")[1]#bart-base
+        # model_str = self.args.model
+        # if "/" in model_str:
+        #     model_str = model_str.split("/")[1]#bart-base
 
      
         self.log_header = (
@@ -96,26 +97,36 @@ class BertTrainer(object):
         )
         return optimizer, scheduler 
     def _get_inputs_dict(self, batch):
-        device = self.device
+        # device = self.device
       
-        pad_token_id = self.tokenizer.pad_token_id
-        input_ids, attention_mask, decoder_input_ids = batch[0], batch[1], batch[2]
-        
-        # _decoder_input_ids = decoder_input_ids[:, :-1].contiguous()
-        # _decoder_input_ids = shift_tokens_right(decoder_input_ids, pad_token_id)
+        # pad_token_id = self.tokenizer.pad_token_id
 
-        
+        # source_ids, source_mask, y = batch[0], batch[1], batch[2]
+        # y_ids = y[:, :-1].contiguous()
+        # lm_labels = y[:, 1:].clone()
+        # lm_labels[y[:, 1:] == pad_token_id] = -100       
+        # inputs = {         
+        #     "input_ids": source_ids.to(device),
+        #     "attention_mask": source_mask.to(device),
+        #     "decoder_input_ids": y_ids.to(device),
+        #     "labels": lm_labels.to(device),
+        # }
+        device = self.device
+        pad_token_id = self.tokenizer.pad_token_id
+        decoder_start_token_id = self.model.config.decoder_start_token_id        
+        input_ids, attention_mask, decoder_input_ids = batch[0], batch[1], batch[2]
+        _decoder_input_ids = shift_tokens_right(decoder_input_ids, pad_token_id,decoder_start_token_id)#关建
         lm_labels = decoder_input_ids[:, :].clone()
         lm_labels[lm_labels[:, :] == pad_token_id] = -100
 
         inputs = {
             "input_ids": input_ids.to(device),
             "attention_mask": attention_mask.to(device),
-            "decoder_input_ids": decoder_input_ids.to(device),
-            # "decoder_attention_mask" : decoder_attention_mask.to(device),
+            "decoder_input_ids": _decoder_input_ids.to(device),
             "labels": lm_labels.to(device),
         }
         return inputs
+
 
     def train_epoch(self, train_dataloader,epoch_number):
         tr_loss = 0
@@ -215,6 +226,7 @@ class BertTrainer(object):
             if results["correct_ratio"] > self.best_dev_acc:
                 self.unimproved_iters = 0
                 self.best_dev_acc = results["correct_ratio"]
+                logger.info(f"save model to {self.args.best_model_dir} model.bin")
                 torch.save(self.model, self.args.best_model_dir + "model.bin")
             else:
                 self.unimproved_iters += 1

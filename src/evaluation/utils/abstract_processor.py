@@ -11,9 +11,7 @@ import csv
 from os import truncate
 import sys
 import json
-from nltk.tokenize import sent_tokenize
 
-from transformers import BartTokenizer, BartForConditionalGeneration
 class InputExample(object):
     """A single training/test example for simple sequence classification."""
 

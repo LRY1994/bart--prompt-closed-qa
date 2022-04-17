@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 import torch
 import torch.nn as nn
-from tabulate import tabulate
+
 from transformers import (
     AdamW,
     AdapterConfig,

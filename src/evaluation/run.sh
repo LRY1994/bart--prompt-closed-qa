@@ -7,7 +7,7 @@ DATA_DIR="/home/simon/datasets/WebQuestion/splitted/"
 BASE_MODEL="facebook/bart-base"
 T=1
 LR=1e-5
-TRAIN_MODE="fusion"
+TRAIN_MODE="base"
 OUTPUT_DIR="output"
 
 python src/evaluation/eval_webquestion.py \
@@ -17,11 +17,11 @@ python src/evaluation/eval_webquestion.py \
 --data_dir $DATA_DIR  \
 --base_model $BASE_MODEL \
 --tokenizer $BASE_MODEL  \
---batch_size 16 \
+--batch_size 8 \
 --eval_batch_size 16 \
 --learning_rate $LR   \
 --pretrain_epoch 0 \
---epochs 2 \
+--epochs 10 \
 --repeat_runs 2 \
 --temperature $T \
 --output_dir  $OUTPUT_DIR  \
