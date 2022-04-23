@@ -10,11 +10,13 @@ import torch.nn as nn
 from transformers import (
     AdamW,
     AdapterConfig,
+    PfeifferConfig,
     AdapterType,
-    AutoConfig,
-    AutoModel,
+    AutoConfig, 
     AutoTokenizer,
-    RobertaTokenizer
+    BartTokenizer,
+    BartConfig
+    
 )
 
 import wandb
@@ -22,7 +24,7 @@ import wandb
 from utils.bert_trainer_prompt import BertTrainer
 from utils.common import print_args_as_table
 from utils.kg_processor import  KGProcessor_prompt
-from model import RelPrompt
+from model2 import RelPrompt
 
 # 1. Start a W&B run
 # wandb.init(project="Entity prediction with partition")
@@ -149,36 +151,26 @@ def get_args():
 
 def init_model(args, relid=None):
     print(f"Initializing model from {args.model}")
-    from_tf = False
-    if (
-        (
-            ("BioRedditBERT" in args.model)
-            or ("BioBERT" in args.model)
-            or ("SapBERT" in args.model)
-        )
-        and "step_" not in args.model
-        and "epoch_" not in args.model
-    ):
-        from_tf = True
-    config = AutoConfig.from_pretrained(args.model)
-    
-    model = RelPrompt.from_pretrained(
-        args.model, config=config, rel=relid, devices=args.device
-    )
+
+    config = BartConfig.from_pretrained(args.model)
+
+    model = RelPrompt.from_pretrained(  args.model , config=config, rel=relid, devices=args.device )  
+   
+  
     if args.use_adapter:
-        adapter_config = AdapterConfig.load(
-            "pfeiffer",
+        # PfeifferConfig :places an adapter layer only after the feed-forward block in each Transformer layer.
+        adapter_config = PfeifferConfig(
+            
             # non_linearity=adapter_args.adapter_non_linearity,
             reduction_factor=args.CRate,  # adapter_args.adapter_reduction_factor, #{2,16,64}
-            leave_out=[]
+            leave_out=[] 
             if args.adapter_layers is None
             else list(
                 set(range(model.config.num_hidden_layers)) - set(args.adapter_layers)
             ),
         )
-        model.add_adapter(
-            args.adapter_names, AdapterType.text_task, config=adapter_config
-        )
+        print(adapter_config)
+        model.add_adapter(  args.adapter_names, config=adapter_config )
         model.train_adapter([args.adapter_names])
     model.to(device)
     if args.n_gpu > 1:
@@ -277,11 +269,15 @@ if __name__ == "__main__":
     # wandb.config.update(args)
 
     
-    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer) 
-    # tokenizer = RobertaTokenizer.from_pretrained(args.tokenizer)
+    tokenizer = BartTokenizer.from_pretrained(args.tokenizer) 
+  
     
     rel_names = list(map(data_processor.id2rel.get, data_processor.top_rel))
+    print(rel_names)#['instance of', 'languages spoken, written or signed', 'director', 'country of citizenship', 'member of sports team', 'located in the administrative territorial entity', 'place of birth', 'followed by', 'cast member', 'exhibition history']
+    # relations = tokenizer(rel_names, add_special_tokens=False)['input_ids']
     relations = tokenizer(rel_names, add_special_tokens=False, add_prefix_space=True)['input_ids']
+   
+    print(relations[0]) #[48768, 9]
     
     model, optimizer = init_model(args, relations[0])
     for group_idx in range(args.n_partition):

@@ -36,37 +36,21 @@ class BertTrainer(object):
             self.total_step += 1
             self.model.train()
             batch = tuple(t.to(self.args.device) for t in batch)
-            if "roberta" in self.tokenizer.name_or_path:
-                input_ids, input_mask, label_ids, label_mask = batch
-                inputs = {
-                    "input_ids": input_ids,
-                    # "attention_mask": input_mask,
-                    'mode': 'query'
-
-                }
-                labels = {
-                    "input_ids": label_ids,
-                    # "attention_mask": label_mask,
-                    'mode': 'answer'
-                }
-            else:
-                input_ids, input_mask, segment_ids, label_ids, label_mask, label_segment_ids = batch
-                inputs = {
-                    "input_ids": input_ids,
-                    "attention_mask": input_mask,
-                    "token_type_ids": segment_ids,
-                }
-                labels = {
-                    "input_ids": label_ids,
-                    "attention_mask": label_mask,
-                    "token_type_ids": label_segment_ids,
-                }
-            # if self.args.adapter_names:
-            #     inputs["adapter_names"] = self.args.adapter_names
+            input_ids, input_mask, label_ids, label_mask = batch
+            # print(input_ids)
+            inputs = {
+                "input_ids": input_ids,
+                'mode': 'query'
+            }
+            labels = {
+                "input_ids": label_ids,
+                'mode': 'answer'
+            }
+            
             if self.args.amp:
                 with autocast():
-                    sequence_output1 = self.model(**inputs)[0]
-                    sequence_output2 = self.model(**labels)[0]
+                    sequence_output1 = self.model(**inputs)[0]#last_hidden_state 
+                    sequence_output2 = self.model(**labels)[0]#last_hidden_state 
             else:
                 sequence_output1 = self.model(**inputs)[0]  
                 sequence_output2 = self.model(**labels)[0] 
@@ -79,14 +63,7 @@ class BertTrainer(object):
             label_index = torch.cat([label_index, label_index], dim=0)
             loss = self.loss(query_embed, label_index)
             # wandb.log({"loss": loss})
-            # if "roberta" in self.tokenizer.name_or_path:
-            #     logits = logits[
-            #         :, 0, :
-            #     ]  # For RoBERTa, it only output the sequence hidden layers
-            # if self.args.is_multilabel:
-            #     loss = F.binary_cross_entropy_with_logits(logits, label_ids.float())
-            # else:
-            #     loss = F.cross_entropy(logits, torch.argmax(label_ids, dim=1))
+           
 
             if self.args.n_gpu > 1:
                 loss = loss.mean()
@@ -162,21 +139,14 @@ class BertTrainer(object):
             #     label[idx] = 1
             #     labels.append(label)
             # label_ids = torch.as_tensor(labels, dtype=torch.long)
-            if "roberta" in self.args.tokenizer.lower():
-                return (
-                    text_features.input_ids,
-                    text_features.attention_mask,
-                    label_features.input_ids,
-                    label_features.attention_mask,
-                )
+           
             return (
                 text_features.input_ids,
                 text_features.attention_mask,
-                text_features.token_type_ids,
                 label_features.input_ids,
                 label_features.attention_mask,
-                label_features.token_type_ids,
             )
+          
        
         examples = self.processor._create_examples(group_idx)
         self.num_train_optimization_steps = (

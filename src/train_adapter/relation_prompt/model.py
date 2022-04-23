@@ -25,7 +25,13 @@ class RelPrompt(RobertaForMaskedLM):
         self.devices = devices
         # rel_emb = copy.deepcopy(self.roberta.embeddings.word_embeddings(torch.tensor(rel)))      
         # self.prompt = nn.Embedding.from_pretrained(rel_emb)
+
+        # self.roberta = RobertaModel(config, add_pooling_layer=False)
+        # self.roberta.embeddings = RobertaEmbeddings(config)
+        # self.roberta.embeddings.word_embeddings = nn.Embedding(config.vocab_size, config.hidden_size, padding_idx=config.pad_token_id)
         self.prompt = nn.Parameter(self.roberta.embeddings.word_embeddings(torch.tensor(rel)).clone())
+        # print(self.roberta)#RobertaModel
+        print(self)
 
         self.prompt.requires_grad = True
         # self.ent_lm_head = EntLMHead(config)
@@ -87,6 +93,7 @@ class RelPrompt(RobertaForMaskedLM):
             inputs_embeds=inputs_embeds
         )
         return outputs
+        #last_hidden_state (torch.FloatTensor of shape (batch_size, sequence_length, hidden_size)) 
         # sequence_output = outputs[0]  # batch x seq_len x hidden_size
 
         # loss_fct = CrossEntropyLoss(ignore_index=-1, reduction='mean')

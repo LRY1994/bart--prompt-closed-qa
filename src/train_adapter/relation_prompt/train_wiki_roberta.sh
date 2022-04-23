@@ -1,5 +1,7 @@
-MODEL="roberta-base"
-TOKENIZER="roberta-base"
+MODEL="facebook/bart-base"
+TOKENIZER="facebook/bart-base"
+# MODEL="roberta-base"
+# TOKENIZER="roberta-base"
 INPUT_DIR="/home/simon/wikidata5m"
 OUTPUT_DIR="checkpoints"
 DATASET_NAME="wikidata5m"
@@ -15,7 +17,7 @@ python src/train_adapter/relation_prompt/run_pretrain.py \
 --n_partition $PARTITION \
 --use_adapter \
 --non_sequential \
---adapter_names  $ADAPTER_NAMES\
+--adapter_names  $ADAPTER_NAMES \
 --amp \
 --cuda \
 --num_workers 32 \
@@ -24,7 +26,6 @@ python src/train_adapter/relation_prompt/run_pretrain.py \
 --lr 1e-04 \
 --epochs 2 \
 --save_step 2000 \
---triple_per_relation $TRIPLE_PER_RELATION \
---pretrain_epoch 0 
+--triple_per_relation $TRIPLE_PER_RELATION 
 
 #bash src/train_adapter/relation_prompt/train_wiki_roberta.sh

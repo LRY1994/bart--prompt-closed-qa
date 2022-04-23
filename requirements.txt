@@ -2,6 +2,6 @@ tabulate
 adapter-transformers==2.3.0
 wandb
 pandas
-metis
 pytorch_metric_learning
 numpy
+pymetis
