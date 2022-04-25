@@ -211,7 +211,7 @@ def load_fusion_adapter_model(args,base_model):
         for adapter_name in adapter_names:
             adapter_dir = os.path.join(model_path, adapter_name)
             new_adapter_name = model_path[-14:][:-8] + "_" + adapter_name  
-            print('before')        
+            print('before:',adapter_dir)        
             base_model.load_adapter(adapter_dir, load_as=new_adapter_name)###这里有问题
             print('after')
             fusion_adapter_rename.append(new_adapter_name)

@@ -6,4 +6,7 @@
 conda create -n qa python=3.8
 conda install pytorch torchvision torchaudio cudatoolkit=11.3 -c pytorch
 pip install -r requirements.txt
+sudo wg-quick up tw
+bash src/relation_prompt/train_wiki_roberta.sh
+bash src/evaluation/run.sh
 ```

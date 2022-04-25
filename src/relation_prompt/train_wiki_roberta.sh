@@ -9,7 +9,7 @@ ADAPTER_NAMES="entity_predict"
 PARTITION=10
 TRIPLE_PER_RELATION=5000
 
-python src/train_adapter/relation_prompt/run_pretrain.py \
+python src/relation_prompt/run_pretrain.py \
 --model $MODEL \
 --tokenizer $TOKENIZER \
 --input_dir $INPUT_DIR \

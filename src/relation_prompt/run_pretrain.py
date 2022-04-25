@@ -169,7 +169,7 @@ def init_model(args, relid=None):
                 set(range(model.config.num_hidden_layers)) - set(args.adapter_layers)
             ),
         )
-        print(adapter_config)
+        # print(adapter_config)
         model.add_adapter(  args.adapter_names, config=adapter_config )
         model.train_adapter([args.adapter_names])
     model.to(device)

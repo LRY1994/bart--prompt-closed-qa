@@ -2,12 +2,12 @@ DATASET="WebQuestion"
 # TriviaQA
 # NaturalQuestions
 # SQuAD2
-MODEL_DIR="src/train_adapter/relation_prompt/checkpoints/roberta-base_20220411_001827_adapter"
+MODEL_DIR="checkpoints/bart-base_20220425_215439_adapter"
 DATA_DIR="/home/simon/datasets/WebQuestion/splitted/"
 BASE_MODEL="facebook/bart-base"
 T=1
 LR=1e-5
-TRAIN_MODE="base"
+TRAIN_MODE="fusion"
 OUTPUT_DIR="output"
 
 python src/evaluation/eval_webquestion.py \
