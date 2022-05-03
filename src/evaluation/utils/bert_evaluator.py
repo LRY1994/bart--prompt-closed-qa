@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore")
 
 class BertEvaluator(object):
     def __init__(
-        self, model, processor, tokenizer, args, logger,split="dev",
+        self, model, processor, tokenizer, args, logger, wandb,split="dev",
         
     ):
         self.args = args
@@ -31,6 +31,7 @@ class BertEvaluator(object):
         self.split = split
         self.logger = logger
         self.device = args.device
+        self.wandb = wandb
         if (split == 'dev'): self.eval_examples = self.processor.get_dev_examples()
         if (split == 'train'): self.eval_examples = self.processor.get_train_examples()
         if (split == 'test'): self.eval_examples = self.processor.get_test_examples()

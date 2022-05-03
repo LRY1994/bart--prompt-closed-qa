@@ -18,7 +18,7 @@ from transformers import (
 )
 
 class BertTrainer(object):
-    def __init__(self, model, processor, tokenizer, args,logger):      
+    def __init__(self, model, processor, tokenizer, args,logger,wandb):      
         self.args = args
         self.model = model
         self.processor = processor
@@ -26,6 +26,7 @@ class BertTrainer(object):
         self.device = args.device
         self.train_examples = self.processor.get_train_examples()
         self.logger = logger
+        self.wandb = wandb
        
         # model_str = self.args.model
         # if "/" in model_str:
@@ -144,8 +145,8 @@ class BertTrainer(object):
             
             outputs = self.model(**inputs)
             loss = outputs[0]
-            args = self.args
-            
+            loss.requires_grad_(True) 
+           
             #outputs = self.model.model(**inputs)
             # print(outputs[0].shape)#torch.Size([4, 36, 768]) 
             # print(self.model.model.shared.weight.shape)#torch.Size([50265, 768])
@@ -157,19 +158,19 @@ class BertTrainer(object):
             # loss = loss_fct( lm_logits.view(-1, self.model.config.vocab_size), inputs['decoder_input_ids'].view(-1) )
             
            
+            
+            
+            # current_loss = loss.item()
+            
+            # batch_iterator.set_description(
+            #     f"Batch Running Loss: {current_loss:9.4f}"
+            # )
+            
             if self.args.n_gpu > 1:
                 loss = loss.mean()
-            
-            current_loss = loss.item()
-            
-            batch_iterator.set_description(
-                f"Batch Running Loss: {current_loss:9.4f}"
-            )
-            
-
             if self.args.gradient_accumulation_steps > 1:
                 loss = loss / self.args.gradient_accumulation_steps
-            
+                       
             loss.backward() 
             tr_loss += loss.item()
 
@@ -180,8 +181,10 @@ class BertTrainer(object):
                 self.global_step += 1
         
         logger.info(f"Epoch Training Loss :{tr_loss}")
+       
         self.epoch_losses.append(tr_loss)
             
+        return tr_loss
 
 
 
@@ -212,13 +215,18 @@ class BertTrainer(object):
         for epoch in train_iterator:
             train_iterator.set_description(f"Epoch {epoch } of {args.epochs}")
             logger.info(f"Epoch {epoch } of {args.epochs}")
-            self.train_epoch(train_dataloader,epoch)
+            tr_loss = self.train_epoch(train_dataloader,epoch)
 
             dev_evaluator = BertEvaluator(
                 self.model, self.processor, self.tokenizer, self.args, logger,split="dev"
             )
             results = dev_evaluator.get_scores()
             logger.info(results)
+            
+            self.wandb.log(
+                {'Epoch Evaluate accuracy':results['correct_ratio'],
+                 'Epoch Training Loss': tr_loss},
+                step = epoch )
             
             
 

@@ -170,8 +170,8 @@ def init_model(args, relid=None):
             ),
         )
         # print(adapter_config)
-        model.add_adapter(  args.adapter_names, config=adapter_config )
-        model.train_adapter([args.adapter_names])
+        model.add_adapter( args.adapter_names, config=adapter_config )
+        model.train_adapter( args.adapter_names)
     model.to(device)
     if args.n_gpu > 1:
         model = torch.nn.DataParallel(model)
@@ -279,10 +279,12 @@ if __name__ == "__main__":
    
     print(relations[0]) #[48768, 9]
     
-    model, optimizer = init_model(args, relations[0])
+    # model, optimizer = init_model(args, relations[0])
     for group_idx in range(args.n_partition):
-        if group_idx != 0 and args.non_sequential:
-            model, optimizer = init_model(args, relations[group_idx])
+        # if group_idx != 0 and args.non_sequential:
+        #     model, optimizer = init_model(args, relations[group_idx])
+        # if group_idx != 0 and args.non_sequential:
+        model, optimizer = init_model(args, relations[group_idx])
         # wandb.watch(model)
         trainer = BertTrainer(model, optimizer, data_processor, tokenizer, args)
         

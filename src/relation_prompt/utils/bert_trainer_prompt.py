@@ -195,8 +195,6 @@ class BertTrainer(object):
         print(f"saving model to {save_path}")
         os.makedirs(save_path, exist_ok=True)
         if self.args.n_gpu > 1:
-            # self.model.module.save_pretrained(save_path)
             self.model.module.save_adapter(save_path, self.args.adapter_names)
         else:
-            # self.model.save_pretrained(save_path)
             self.model.save_adapter(save_path, self.args.adapter_names)

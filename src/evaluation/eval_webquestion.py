@@ -7,7 +7,7 @@ from argparse import ArgumentParser
 from datetime import datetime
 from os import listdir
 from statistics import mean, stdev
-from xmlrpc.client import boolean
+
 import logging
 import numpy as np
 
@@ -26,7 +26,11 @@ from utils.bert_trainer import BertTrainer
 from utils.bioasq_processor import BioAsqProcessor
 from utils.common_utils import print_args_as_table
 
-# wandb.init(project="webquestion")
+
+
+wandb.init(project="webquestion  base")
+
+
 
 def get_args():
     parser = ArgumentParser(
@@ -112,11 +116,12 @@ def get_args():
     parser.add_argument('--use_multiprocessed_decoding', type=bool, default=False)
 
     args = parser.parse_args()
+   
     return args
 
 
 def evaluate_split(model, processor, tokenizer, args, logger,split="dev"):
-    evaluator = BertEvaluator(model, processor, tokenizer, args, logger,split )
+    evaluator = BertEvaluator(model, processor, tokenizer, args, logger,wandb,split )
     result = evaluator.get_scores()
     split_result = {}
     for k, v in result.items():
@@ -193,7 +198,6 @@ def check_adapter_names(model_path, adapter_names):
 
 
 
-
 def load_fusion_adapter_model(args,base_model):
     # print(base_model)
     """Load fusion adapter model.
@@ -212,14 +216,15 @@ def load_fusion_adapter_model(args,base_model):
             adapter_dir = os.path.join(model_path, adapter_name)
             new_adapter_name = model_path[-14:][:-8] + "_" + adapter_name  
             print('before:',adapter_dir)        
-            base_model.load_adapter(adapter_dir, load_as=new_adapter_name)###这里有问题
+            base_model.load_adapter(adapter_dir, load_as=new_adapter_name,with_head=False)###这里有问题
             print('after')
             fusion_adapter_rename.append(new_adapter_name)
 
     # print("fusion_adapter_rename:",fusion_adapter_rename)
     fusion_config = AdapterFusionConfig.load("dynamic", temperature=args.temperature)
-    base_model.add_fusion(fusion_adapter_rename, fusion_config)
+    base_model.add_adapter_fusion(fusion_adapter_rename)
     base_model.set_active_adapters(fusion_adapter_rename)
+    base_model.train_adapter_fusion(fusion_adapter_rename)
     config = AutoConfig.from_pretrained(
         os.path.join(adapter_dir, "adapter_config.json")
     )
@@ -266,7 +271,7 @@ if __name__ == "__main__":
     args.n_gpu = n_gpu
     
     # Record config on wandb
-    # wandb.config.update(args)
+    wandb.config.update(args)
     print_args_as_table(args)
 
     processor = BioAsqProcessor(args.data_dir, logger)   
@@ -303,7 +308,7 @@ if __name__ == "__main__":
        
 
         logger.info('***Training Model***')
-        trainer = BertTrainer(model, processor, tokenizer, args,logger)      
+        trainer = BertTrainer(model, processor, tokenizer, args,logger,wandb)      
         trainer.train()
        
 
@@ -316,17 +321,17 @@ if __name__ == "__main__":
 
         train_result = evaluate_split(model, processor, tokenizer, args, logger,split="train")
         train_result["run_num"] = i
-        # wandb.log(train_result)  # Record Dev Result
+        wandb.log(train_result)  # Record Dev Result
         train_acc_list.append(train_result["train_correct_ratio"])
 
         dev_result = evaluate_split(model, processor, tokenizer, args, logger,split="dev")
         dev_result["run_num"] = i
-        # wandb.log(dev_result)  # Record Dev Result
+        wandb.log(dev_result)  # Record Dev Result
         dev_acc_list.append(dev_result["dev_correct_ratio"])
 
         test_result = evaluate_split(model, processor, tokenizer, args, logger,split="test")
         test_result["run_num"] = i
-        # wandb.log(test_result)  # Record Testing Result
+        wandb.log(test_result)  # Record Testing Result
         test_acc_list.append(test_result["test_correct_ratio"])
 
         if (
@@ -338,6 +343,7 @@ if __name__ == "__main__":
             logger.info(f"correct_ratio of {test_result['test_correct_ratio']}.")
 
     logger.info(f"***{args.repeat_runs} training is finished****")
+    
     result = {}
     result["seed_list"] = seed_list
     result["train_acc_mean"] = mean(train_acc_list)  # average of the ten runs
@@ -346,7 +352,7 @@ if __name__ == "__main__":
     result["dev_acc_std"] = stdev(dev_acc_list)  # average of the ten runs
     result["test_acc_mean"] = mean(test_acc_list)  # average of the ten runs
     result["test_acc_std"] = stdev(test_acc_list)  # average of the ten runs
-    # wandb.config.update(result)
+    wandb.config.update(result)
     logger.info(result)
     
     print(result)
