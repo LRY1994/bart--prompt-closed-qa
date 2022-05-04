@@ -121,7 +121,7 @@ def get_args():
 
 
 def evaluate_split(model, processor, tokenizer, args, logger,split="dev"):
-    evaluator = BertEvaluator(model, processor, tokenizer, args, logger,wandb,split )
+    evaluator = BertEvaluator(model, processor, tokenizer, args, logger,split )
     result = evaluator.get_scores()
     split_result = {}
     for k, v in result.items():
@@ -216,15 +216,15 @@ def load_fusion_adapter_model(args,base_model):
             adapter_dir = os.path.join(model_path, adapter_name)
             new_adapter_name = model_path[-14:][:-8] + "_" + adapter_name  
             print('before:',adapter_dir)        
-            base_model.load_adapter(adapter_dir, load_as=new_adapter_name,with_head=False)###这里有问题
+            base_model.load_adapter(adapter_dir, load_as=new_adapter_name,with_head=False,config='pfeiffer')###这里有问题
             print('after')
             fusion_adapter_rename.append(new_adapter_name)
 
     # print("fusion_adapter_rename:",fusion_adapter_rename)
     fusion_config = AdapterFusionConfig.load("dynamic", temperature=args.temperature)
-    base_model.add_adapter_fusion(fusion_adapter_rename)
+    base_model.add_adapter_fusion(fusion_adapter_rename,"dynamic")
     base_model.set_active_adapters(fusion_adapter_rename)
-    base_model.train_adapter_fusion(fusion_adapter_rename)
+    base_model.train_adapter_fusion([fusion_adapter_rename])
     config = AutoConfig.from_pretrained(
         os.path.join(adapter_dir, "adapter_config.json")
     )
@@ -344,15 +344,19 @@ if __name__ == "__main__":
 
     logger.info(f"***{args.repeat_runs} training is finished****")
     
+
     result = {}
     result["seed_list"] = seed_list
-    result["train_acc_mean"] = mean(train_acc_list)  # average of the ten runs
-    result["train_acc_std"] = stdev(train_acc_list)  # average of the ten runs
-    result["dev_acc_mean"] = mean(dev_acc_list)  # average of the ten runs
-    result["dev_acc_std"] = stdev(dev_acc_list)  # average of the ten runs
-    result["test_acc_mean"] = mean(test_acc_list)  # average of the ten runs
-    result["test_acc_std"] = stdev(test_acc_list)  # average of the ten runs
+    if args.repeat_runs > 1 :
+        result["train_acc_mean"] = mean(train_acc_list)  # average of the ten runs
+        result["train_acc_std"] = stdev(train_acc_list)  # average of the ten runs
+        result["dev_acc_mean"] = mean(dev_acc_list)  # average of the ten runs
+        result["dev_acc_std"] = stdev(dev_acc_list)  # average of the ten runs
+        result["test_acc_mean"] = mean(test_acc_list)  # average of the ten runs
+        result["test_acc_std"] = stdev(test_acc_list)  # average of the ten runs
+    
     wandb.config.update(result)
     logger.info(result)
+    
     
     print(result)
