@@ -10,7 +10,6 @@ from tqdm.auto import tqdm
 from utils.abstract_processor import (
     BertProcessor,
     InputExample,
-    convert_examples_to_features,
 )
 from utils.common import _construct_adj, partition_graph, timeit
 

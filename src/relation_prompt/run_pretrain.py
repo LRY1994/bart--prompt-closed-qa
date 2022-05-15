@@ -10,15 +10,18 @@ import torch.nn as nn
 from transformers import (
     AdamW,
     AdapterConfig,
+    HoulsbyConfig,
     PfeifferConfig,
+    ParallelConfig,
+    PrefixTuningConfig,
     AdapterType,
     AutoConfig, 
     AutoTokenizer,
     BartTokenizer,
-    BartConfig
-    
+    BartConfig ,
+    AutoModelForCausalLM
 )
-
+# from transformers.adapters import PrefixTuningConfig
 import wandb
 
 from utils.bert_trainer_prompt import BertTrainer
@@ -153,23 +156,22 @@ def init_model(args, relid=None):
     print(f"Initializing model from {args.model}")
 
     config = BartConfig.from_pretrained(args.model)
-
+    
     model = RelPrompt.from_pretrained(  args.model , config=config, rel=relid, devices=args.device )  
    
   
     if args.use_adapter:
         # PfeifferConfig :places an adapter layer only after the feed-forward block in each Transformer layer.
-        adapter_config = PfeifferConfig(
-            
-            # non_linearity=adapter_args.adapter_non_linearity,
-            reduction_factor=args.CRate,  # adapter_args.adapter_reduction_factor, #{2,16,64}
-            leave_out=[] 
-            if args.adapter_layers is None
-            else list(
-                set(range(model.config.num_hidden_layers)) - set(args.adapter_layers)
-            ),
-        )
-        # print(adapter_config)
+        # adapter_config = PfeifferConfig(           
+        #     # non_linearity=adapter_args.adapter_non_linearity,
+        #     reduction_factor=args.CRate,  # adapter_args.adapter_reduction_factor, #{2,16,64}
+        #     leave_out=[]           
+        # )
+
+        # adapter_config= PrefixTuningConfig(flat=False, prefix_length=30)       
+        # adapter_config = HoulsbyConfig()
+        # adapter_config = PfeifferConfig()
+        adapter_config = ParallelConfig()
         model.add_adapter( args.adapter_names, config=adapter_config )
         model.train_adapter( args.adapter_names)
     model.to(device)

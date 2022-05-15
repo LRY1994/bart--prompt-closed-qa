@@ -6,7 +6,7 @@ INPUT_DIR="/home/simon/wikidata5m"
 OUTPUT_DIR="checkpoints"
 DATASET_NAME="wikidata5m"
 ADAPTER_NAMES="entity_predict"
-PARTITION=10
+PARTITION=100
 TRIPLE_PER_RELATION=5000
 
 python src/relation_prompt/run_pretrain.py \
@@ -15,17 +15,16 @@ python src/relation_prompt/run_pretrain.py \
 --input_dir $INPUT_DIR \
 --output_dir $OUTPUT_DIR \
 --n_partition $PARTITION \
---use_adapter \
---non_sequential \
+--triple_per_relation $TRIPLE_PER_RELATION \
 --adapter_names  $ADAPTER_NAMES \
---amp \
+--use_adapter \
 --cuda \
---num_workers 32 \
---max_seq_length 64 \
+--num_workers 16 \
+--max_seq_length 128 \
 --batch_size 64  \
 --lr 1e-04 \
---epochs 2 \
---save_step 2000 \
---triple_per_relation $TRIPLE_PER_RELATION 
+--epochs 1 \
+--save_step 2000 
 
-#bash src/train_adapter/relation_prompt/train_wiki_roberta.sh
+
+#bash src/relation_prompt/run_pretrain.sh

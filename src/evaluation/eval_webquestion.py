@@ -113,6 +113,7 @@ def get_args():
     parser.add_argument('--top_k', type=float, default=None)
     parser.add_argument('--top_p', type=float, default=None)
     parser.add_argument('--num_return_sequences', type=int, default=1)
+    parser.add_argument('--adapter_num', type=int, default=1)
     parser.add_argument('--use_multiprocessed_decoding', type=bool, default=False)
 
     args = parser.parse_args()
@@ -157,13 +158,23 @@ def search_adapters(args):
         [dict]: {model_path:[adapter_names]}
     """
     adapter_paths_dic = {}
+    adapter_paths = []
    
     model_path = args.model_dir  # checkpoints/roberta-base_20220411_001827_adapter
-    adapter_paths = [f for f in listdir(model_path)]#[group_0_epoch_0,xxx]
+    for f in listdir(model_path):
+        index = f.find('_epoch')
+        groupindex = f[6 : index]
+        if int(groupindex) < args.adapter_num :
+            adapter_paths.append(f)
+
+    # adapter_paths = [f for f in listdir(model_path)]#[group_0_epoch_0,xxx]
     print(f"Found {len(adapter_paths)} adapter paths")
     # model_path父目录, adapter_paths adpter.json
+   
     adapter_paths = check_adapter_names(model_path, adapter_paths)
     adapter_paths_dic[model_path] = adapter_paths
+    
+    
     return adapter_paths_dic
 
 
@@ -215,13 +226,13 @@ def load_fusion_adapter_model(args,base_model):
         for adapter_name in adapter_names:
             adapter_dir = os.path.join(model_path, adapter_name)
             new_adapter_name = model_path[-14:][:-8] + "_" + adapter_name  
-            print('before:',adapter_dir)        
-            base_model.load_adapter(adapter_dir, load_as=new_adapter_name,with_head=False,config='pfeiffer')###这里有问题
-            print('after')
+            # print('before:',adapter_dir)        
+            base_model.load_adapter(adapter_dir, load_as=new_adapter_name,with_head=False)###这里有问题
+            # print('after')
             fusion_adapter_rename.append(new_adapter_name)
 
     # print("fusion_adapter_rename:",fusion_adapter_rename)
-    fusion_config = AdapterFusionConfig.load("dynamic", temperature=args.temperature)
+    # fusion_config = AdapterFusionConfig.load("dynamic", temperature=args.temperature)
     base_model.add_adapter_fusion(fusion_adapter_rename,"dynamic")
     base_model.set_active_adapters(fusion_adapter_rename)
     base_model.train_adapter_fusion([fusion_adapter_rename])
@@ -311,7 +322,7 @@ if __name__ == "__main__":
         trainer = BertTrainer(model, processor, tokenizer, args,logger,wandb)      
         trainer.train()
        
-
+        
         # 只取最好的
         logger.info("***Evaluating Model(modal is set)***")
         logger.info(f"load model from {args.best_model_dir}model.bin")
@@ -334,13 +345,13 @@ if __name__ == "__main__":
         wandb.log(test_result)  # Record Testing Result
         test_acc_list.append(test_result["test_correct_ratio"])
 
-        if (
-            test_result["test_correct_ratio"] < 0.86
-        ):  # keep the models with excellent performance
-            shutil.rmtree(args.best_model_dir)#递归地删除文件
-        else:
-            logger.info(f"Saving model to {args.best_model_dir}.")
-            logger.info(f"correct_ratio of {test_result['test_correct_ratio']}.")
+        # if (
+        #     test_result["test_correct_ratio"] < 0.86
+        # ):  # keep the models with excellent performance
+        #     shutil.rmtree(args.best_model_dir)#递归地删除文件
+        # else:
+        #     logger.info(f"Saving model to {args.best_model_dir}.")
+        #     logger.info(f"correct_ratio of {test_result['test_correct_ratio']}.")
 
     logger.info(f"***{args.repeat_runs} training is finished****")
     

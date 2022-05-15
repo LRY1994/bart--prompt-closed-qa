@@ -1,5 +1,5 @@
 tabulate
-adapter-transformers==2.3.0
+adapter-transformers==3.0.0
 wandb
 pandas
 pytorch_metric_learning

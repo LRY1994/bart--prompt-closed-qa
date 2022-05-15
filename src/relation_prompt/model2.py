@@ -1,20 +1,18 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from transformers import BartForConditionalGeneration,BartConfig
+from transformers import BartForConditionalGeneration,BartConfig,BartTokenizer,BartAdapterModel
 
-import copy
-
-class RelPrompt(BartForConditionalGeneration):
+class RelPrompt(BartAdapterModel):
     
-    def __init__(self, config, rel=None, devices=None):
+    def __init__(self,config, rel=None, devices=None):
        
         super().__init__(config)
+        # self.model = AutoModelForCausalLM.from_pretrained(model)
         self.prompt_length = len(rel)
         self.devices = devices
         self.word_embeddings  = nn.Embedding(config.vocab_size, config.d_model, config.pad_token_id)
         self.prompt = nn.Parameter( self.word_embeddings(torch.tensor(rel)).clone() )
-
         self.prompt.requires_grad = True
         self.apply(self._init_weights)
 
