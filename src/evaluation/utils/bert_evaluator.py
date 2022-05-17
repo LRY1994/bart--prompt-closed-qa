@@ -37,9 +37,8 @@ class BertEvaluator(object):
         if (split == 'test'):  self.eval_examples = self.processor.get_test_examples()
 
     def _get_inputs_dict(self, batch):
-        # device = self.device
-      
-        # pad_token_id = self.tokenizer.pad_token_id
+        device = self.device     
+        pad_token_id = self.tokenizer.pad_token_id
 
         # source_ids, source_mask, y = batch[0], batch[1], batch[2]
         # y_ids = y[:, :-1].contiguous()
@@ -51,8 +50,7 @@ class BertEvaluator(object):
         #     "decoder_input_ids": y_ids.to(device),
         #     "labels": lm_labels.to(device),
         # }
-        device = self.device
-        pad_token_id = self.tokenizer.pad_token_id
+       
         decoder_start_token_id = self.model.config.decoder_start_token_id        
         input_ids, attention_mask, decoder_input_ids = batch[0], batch[1], batch[2]
         _decoder_input_ids = shift_tokens_right(decoder_input_ids, pad_token_id,decoder_start_token_id)#关建
@@ -68,7 +66,42 @@ class BertEvaluator(object):
         return inputs
 
         
+    def get_loss(self, silent=False,verbose=True,**kwargs):
+        """
+        Evaluates the model on eval_dataset.
 
+        Utility function to be used by the eval_model() method. Not intended to be used directly.
+        """
+        eval_dataloader = create_dataloader(
+            self.eval_examples, 
+            self.tokenizer, 
+            self.args.batch_size, 
+            self.args.max_input_length, 
+            self.args.max_output_length, 
+            isTraining=False)
+
+        self.model.eval()
+
+        eval_loss = 0
+        nb_eval_steps = 0
+       
+        for batch in tqdm( eval_dataloader, desc="Evaluating", disable=silent): 
+            inputs = self._get_inputs_dict( batch )       
+            with torch.no_grad():
+                outputs = self.model(**inputs)
+                loss = outputs[0]
+                eval_loss += loss.mean().item()
+            nb_eval_steps += 1
+    
+        eval_loss = eval_loss / nb_eval_steps
+       
+
+        return eval_loss
+
+    def get_accuracy(self,**kwargs):      
+        result,preds = self.inference()   
+        return result['correct_ratio']
+       
     def get_scores(self, silent=False,verbose=True,**kwargs):
         """
         Evaluates the model on eval_dataset.
@@ -119,7 +152,7 @@ class BertEvaluator(object):
         eval_loss = eval_loss / nb_eval_steps
         results["eval_loss"] = eval_loss  
         # accuracy
-        result , preds = self.inference(self.eval_examples)
+        result , preds = self.inference()
         results.update(result)# {correct_num, correct_ratio}
         target_text = [d.target_text.replace('\n','') for d in self.eval_examples]
         result = self.compute_metrics(target_text, preds, **kwargs)
@@ -136,7 +169,7 @@ class BertEvaluator(object):
         return results #{eval_loss,predict_correct_num,predict_correct_ratio}
             
 
-    def inference(self, pred_data, output_dir=None, suffix=None, verbose=True, silent=False):
+    def inference(self,  output_dir=None, suffix=None, verbose=True, silent=False):
         """
         Performs predictions on a list of text.
         Args:
@@ -147,7 +180,8 @@ class BertEvaluator(object):
             suffix: The supplementary suffix of prediction results name.
         Returns:
             preds: A python list of the generated sequences.
-        """  # noqa: ignore flake8"      
+        """  # noqa: ignore flake8"     
+        pred_data = self.eval_examples 
         to_predict = [d.input_text.replace('\n','') for d in pred_data]
         target_predict = [d.target_text.replace('\n','') for d in pred_data]#groundtruth
         assert len(to_predict)==len(target_predict)
@@ -181,16 +215,10 @@ class BertEvaluator(object):
             outputs = self.model.generate(
                 input_ids=input_ids.to(self.device) ,
                 attention_mask=attention_mask.to(self.device) ,# 这个一定要加
-                # num_beams=self.args.num_beams,
                 max_length=self.args.max_output_length,            
-                # length_penalty=self.args.length_penalty,
                 early_stopping=self.args.early_stopping,
-                # repetition_penalty=self.args.repetition_penalty,
-                # do_sample=self.args.do_sample,
-                # top_k=self.args.top_k,
-                # top_p=self.args.top_p,
-                # num_return_sequences=self.args.num_return_sequences
             )
+           
             
             all_outputs.extend(outputs.cpu().numpy())
 
@@ -249,7 +277,7 @@ class BertEvaluator(object):
             outputs = outputs
 
         result = { 'correct_num':correct_num, 'correct_ratio':correct_ratio }
-        return  result, outputs
+        return  result,outputs
 
 
     def compute_metrics(self, labels, preds, **kwargs):

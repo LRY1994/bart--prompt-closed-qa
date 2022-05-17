@@ -62,7 +62,7 @@ class BertTrainer(object):
             label_index = torch.arange(query_embed1.size(0))
             label_index = torch.cat([label_index, label_index], dim=0)
             loss = self.loss(query_embed, label_index)
-            # wandb.log({"loss": loss})
+            
            
 
             if self.args.n_gpu > 1:
@@ -83,6 +83,7 @@ class BertTrainer(object):
                 self.optimizer.zero_grad()
                 self.iterations += 1
         print(self.tr_loss)
+        wandb.log({"loss": loss})
 
     def train_subgraph_cache_tokens(self, group_idx):
         tokenized_features = self.processor.load_and_cache_tokenized_features(

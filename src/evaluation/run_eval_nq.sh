@@ -1,6 +1,6 @@
-DATASET="WebQuestion"
+DATASET="NaturalQuestions"
 MODEL_DIR="checkpoints/bart-base_20220516_013128_ParallelConfig_adapter"
-DATA_DIR="/home/simon/datasets/WebQuestion/splitted/"
+DATA_DIR="/home/simon/datasets/NaturalQuestions/"
 BASE_MODEL="facebook/bart-base"
 T=1
 LR=4e-5
@@ -28,4 +28,8 @@ python src/evaluation/eval_question.py \
 --output_dir $OUTPUT_DIR \
 --gradient_accumulation_steps 4 \
 --cuda \
+
+#bash src/evaluation/run_eval_wq.sh
+#sudo wg-quick up tw
+# git remote set-url origin https://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@github.com/LRY1994/knowledge-infusion.git/
 

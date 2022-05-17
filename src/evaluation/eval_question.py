@@ -28,8 +28,6 @@ from utils.common_utils import print_args_as_table
 
 
 
-wandb.init(project="webquestion  base")
-
 
 
 def get_args():
@@ -82,19 +80,19 @@ def get_args():
 
     parser.add_argument(
         "--max_input_length",
-        default=128,
+        default=512,
         type=int,
         help="The maximum total input sequence length.",
     )
     parser.add_argument(
         "--max_output_length",
-        default=128,
+        default=512,
         type=int,
         help="The maximum total input sequence length.",
     )
     parser.add_argument(
         "--warmup_proportion",
-        default=0.1,
+        default=0.06,
         type=float,
         help="Proportion of training to perform linear learning rate warmup for",
     )
@@ -123,7 +121,7 @@ def get_args():
 
 def evaluate_split(model, processor, tokenizer, args, logger,split="dev"):
     evaluator = BertEvaluator(model, processor, tokenizer, args, logger,split )
-    result = evaluator.get_scores()
+    result = evaluator.get_accuracy()
     split_result = {}
     for k, v in result.items():
         split_result[f"{split}_{k}"] = v
@@ -248,6 +246,9 @@ if __name__ == "__main__":
 
     args = get_args()
     print(args)
+    
+
+    wandb.init(project=args.dataset)
     #### Start writing logs
 
     log_filename = "log.txt"
@@ -277,7 +278,7 @@ if __name__ == "__main__":
     dev_acc_list = []
     test_acc_list = []
     seed_list = []
-    args.batch_size = args.batch_size // args.gradient_accumulation_steps
+    # args.batch_size = args.batch_size // args.gradient_accumulation_steps
     args.device = device
     args.n_gpu = n_gpu
     
@@ -301,6 +302,7 @@ if __name__ == "__main__":
         args.best_model_dir = f"src/temp/model_{seed}/"
         os.makedirs(args.best_model_dir, exist_ok=True)
         basemodel = BartForConditionalGeneration.from_pretrained(args.base_model)
+        basemodel.init_weights()
         if n_gpu > 0:
             torch.cuda.manual_seed_all(seed)
         if args.train_mode == "fusion":
@@ -324,26 +326,26 @@ if __name__ == "__main__":
        
         
         # 只取最好的
-        logger.info("***Evaluating Model(modal is set)***")
-        logger.info(f"load model from {args.best_model_dir}model.bin")
-        model = torch.load(args.best_model_dir + "model.bin")
+        # logger.info("***Evaluating Model(modal is set)***")
+        # logger.info(f"load model from {args.best_model_dir}model.bin")
+        # model = torch.load(args.best_model_dir + "model.bin")
      
 
 
-        train_result = evaluate_split(model, processor, tokenizer, args, logger,split="train")
-        train_result["run_num"] = i
-        wandb.log(train_result)  # Record Dev Result
-        train_acc_list.append(train_result["train_correct_ratio"])
+        # train_result = evaluate_split(model, processor, tokenizer, args, logger,split="train")
+        # train_result["run_num"] = i
+        # wandb.log(train_result)  # Record Dev Result
+        # train_acc_list.append(train_result["train_correct_ratio"])
 
-        dev_result = evaluate_split(model, processor, tokenizer, args, logger,split="dev")
-        dev_result["run_num"] = i
-        wandb.log(dev_result)  # Record Dev Result
-        dev_acc_list.append(dev_result["dev_correct_ratio"])
+        # dev_result = evaluate_split(model, processor, tokenizer, args, logger,split="dev")
+        # dev_result["run_num"] = i
+        # wandb.log(dev_result)  # Record Dev Result
+        # dev_acc_list.append(dev_result["dev_correct_ratio"])
 
-        test_result = evaluate_split(model, processor, tokenizer, args, logger,split="test")
-        test_result["run_num"] = i
-        wandb.log(test_result)  # Record Testing Result
-        test_acc_list.append(test_result["test_correct_ratio"])
+        # test_result = evaluate_split(model, processor, tokenizer, args, logger,split="test")
+        # test_result["run_num"] = i
+        # wandb.log(test_result)  # Record Testing Result
+        # test_acc_list.append(test_result["test_correct_ratio"])
 
         # if (
         #     test_result["test_correct_ratio"] < 0.86
@@ -366,8 +368,7 @@ if __name__ == "__main__":
         result["test_acc_mean"] = mean(test_acc_list)  # average of the ten runs
         result["test_acc_std"] = stdev(test_acc_list)  # average of the ten runs
     
-    wandb.config.update(result)
+    # wandb.config.update(result)
     logger.info(result)
     
     
-    print(result)

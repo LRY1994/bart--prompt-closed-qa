@@ -30,7 +30,7 @@ from utils.kg_processor import  KGProcessor_prompt
 from model2 import RelPrompt
 
 # 1. Start a W&B run
-# wandb.init(project="Entity prediction with partition")
+wandb.init(project="Entity prediction with partition")
 
 
 from argparse import ArgumentParser
@@ -145,6 +145,14 @@ def get_args():
         default=1000,
         help="Number of triple of one relation",
     )
+    parser.add_argument(
+        "--adapter_type",
+        type=str,
+        default='ParallelConfig',
+        help="adapter_type",
+    )
+
+
   
 
     args = parser.parse_args()
@@ -167,11 +175,11 @@ def init_model(args, relid=None):
         #     reduction_factor=args.CRate,  # adapter_args.adapter_reduction_factor, #{2,16,64}
         #     leave_out=[]           
         # )
+        if args.adapter_type =='PrefixTuningConfig' : adapter_config= PrefixTuningConfig(flat=False, prefix_length=30)
+        if args.adapter_type =='HoulsbyConfig' : adapter_config= HoulsbyConfig()
+        if args.adapter_type =='PfeifferConfig' : adapter_config= PfeifferConfig()
+        if args.adapter_type =='ParallelConfig' : adapter_config= ParallelConfig()
 
-        # adapter_config= PrefixTuningConfig(flat=False, prefix_length=30)       
-        # adapter_config = HoulsbyConfig()
-        # adapter_config = PfeifferConfig()
-        adapter_config = ParallelConfig()
         model.add_adapter( args.adapter_names, config=adapter_config )
         model.train_adapter( args.adapter_names)
     model.to(device)
@@ -220,7 +228,7 @@ if __name__ == "__main__":
     if "/" in model_str:
         model_str = model_str.split("/")[1]
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-    args.model_str = f"{model_str}_{timestamp_str}"
+    args.model_str = f"{model_str}_{timestamp_str}_{args.adapter_type}"
     if args.use_adapter:
         args.model_str += "_adapter"
     args.save_path = args.output_dir + '/' + args.model_str
@@ -268,7 +276,7 @@ if __name__ == "__main__":
     )
     if args.tokenizer is None:
         args.tokenizer = args.model
-    # wandb.config.update(args)
+    wandb.config.update(args)
 
     
     tokenizer = BartTokenizer.from_pretrained(args.tokenizer) 
@@ -287,7 +295,7 @@ if __name__ == "__main__":
         #     model, optimizer = init_model(args, relations[group_idx])
         # if group_idx != 0 and args.non_sequential:
         model, optimizer = init_model(args, relations[group_idx])
-        # wandb.watch(model)
+        wandb.watch(model)
         trainer = BertTrainer(model, optimizer, data_processor, tokenizer, args)
         
         if args.cache_token_encodings:

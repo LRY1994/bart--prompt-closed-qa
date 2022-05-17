@@ -6,7 +6,8 @@ INPUT_DIR="/home/simon/wikidata5m"
 OUTPUT_DIR="checkpoints"
 DATASET_NAME="wikidata5m"
 ADAPTER_NAMES="entity_predict"
-PARTITION=100
+ADAPTER_TYPE="ParallelConfig" #PrefixTuningConfig HoulsbyConfig PfeifferConfig ParallelConfig
+PARTITION=50
 TRIPLE_PER_RELATION=5000
 
 python src/relation_prompt/run_pretrain.py \
@@ -17,14 +18,13 @@ python src/relation_prompt/run_pretrain.py \
 --n_partition $PARTITION \
 --triple_per_relation $TRIPLE_PER_RELATION \
 --adapter_names  $ADAPTER_NAMES \
+--adapter_type $ADAPTER_TYPE \
 --use_adapter \
 --cuda \
 --num_workers 16 \
 --max_seq_length 128 \
 --batch_size 64  \
 --lr 1e-04 \
---epochs 1 \
---save_step 2000 
-
+--epochs 20 \
 
 #bash src/relation_prompt/run_pretrain.sh

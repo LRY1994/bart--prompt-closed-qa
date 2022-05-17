@@ -2,6 +2,7 @@ from asyncio.log import logger
 import datetime
 import sys
 import json
+from sklearn.metrics import accuracy_score
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, RandomSampler, TensorDataset, Dataset
@@ -98,9 +99,8 @@ class BertTrainer(object):
         )
         return optimizer, scheduler 
     def _get_inputs_dict(self, batch):
-        # device = self.device
-      
-        # pad_token_id = self.tokenizer.pad_token_id
+        device = self.device
+        pad_token_id = self.tokenizer.pad_token_id
 
         # source_ids, source_mask, y = batch[0], batch[1], batch[2]
         # y_ids = y[:, :-1].contiguous()
@@ -112,14 +112,14 @@ class BertTrainer(object):
         #     "decoder_input_ids": y_ids.to(device),
         #     "labels": lm_labels.to(device),
         # }
-        device = self.device
-        pad_token_id = self.tokenizer.pad_token_id
+       
+        
         decoder_start_token_id = self.model.config.decoder_start_token_id        
         input_ids, attention_mask, decoder_input_ids = batch[0], batch[1], batch[2]
         _decoder_input_ids = shift_tokens_right(decoder_input_ids, pad_token_id,decoder_start_token_id)#关建
         lm_labels = decoder_input_ids[:, :].clone()
         lm_labels[lm_labels[:, :] == pad_token_id] = -100
-
+       
         inputs = {
             "input_ids": input_ids.to(device),
             "attention_mask": attention_mask.to(device),
@@ -145,7 +145,7 @@ class BertTrainer(object):
             
             outputs = self.model(**inputs)
             loss = outputs[0]
-            loss.requires_grad_(True) 
+            # loss.requires_grad_(True) 
            
             #outputs = self.model.model(**inputs)
             # print(outputs[0].shape)#torch.Size([4, 36, 768]) 
@@ -175,6 +175,7 @@ class BertTrainer(object):
             tr_loss += loss.item()
 
             if (step + 1) % self.args.gradient_accumulation_steps == 0:
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
                 self.optimizer.step()
                 self.scheduler.step()
                 self.model.zero_grad()
@@ -220,21 +221,36 @@ class BertTrainer(object):
             dev_evaluator = BertEvaluator(
                 self.model, self.processor, self.tokenizer, self.args, logger,split="dev"
             )
-            results = dev_evaluator.get_scores()
-            logger.info(results)
-            
+
+           
+            dev_loss = dev_evaluator.get_loss()            
+            dev_accuracy = dev_evaluator.get_accuracy()                    
+            logger.info(f"dev_results :{dev_loss}, {dev_accuracy}")   
+
             self.wandb.log(
-                {'Epoch Evaluate accuracy':results['correct_ratio'],
-                 'Epoch Training Loss': tr_loss},
+                {'Epoch Dev accuracy':dev_accuracy,
+                 'Epoch Dev Loss':dev_loss,
+                 'Epoch Train Loss': tr_loss
+                },
                 step = epoch )
             
             
 
             # Update validation results
-            if results["correct_ratio"] > self.best_dev_acc:
+            if dev_accuracy > self.best_dev_acc:
                 self.unimproved_iters = 0
-                self.best_dev_acc = results["correct_ratio"]
-                logger.info(f"save model to {self.args.best_model_dir} model.bin")
+                self.best_dev_acc = dev_accuracy
+
+                test_evaluator = BertEvaluator(
+                    self.model, self.processor, self.tokenizer, self.args, logger,split="test"
+                )
+                test_accuracy= test_evaluator.get_accuracy()
+                logger.info(f"test_accuracy :{test_accuracy}") 
+                self.wandb.log(
+                    {'Epoch Test accuracy':test_accuracy},
+                    step = epoch )
+
+                logger.info(f"save model to {self.args.best_model_dir}model.bin")         
                 torch.save(self.model, self.args.best_model_dir + "model.bin")
             else:
                 self.unimproved_iters += 1

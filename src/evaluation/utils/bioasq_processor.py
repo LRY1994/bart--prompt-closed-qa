@@ -121,7 +121,8 @@ def create_dataloader(examples, tokenizer, batch_size, max_input_length, max_out
     dataloader = DataLoader(
         dataset, 
         sampler=sampler, 
-        batch_size=batch_size
+        batch_size=batch_size,
+        num_workers=0
     )
     return dataloader
 
