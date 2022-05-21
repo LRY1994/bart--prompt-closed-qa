@@ -228,7 +228,7 @@ if __name__ == "__main__":
     if "/" in model_str:
         model_str = model_str.split("/")[1]
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-    args.model_str = f"{model_str}_{timestamp_str}_{args.adapter_type}"
+    args.model_str = f"{model_str}_{args.adapter_type}"
     if args.use_adapter:
         args.model_str += "_adapter"
     args.save_path = args.output_dir + '/' + args.model_str

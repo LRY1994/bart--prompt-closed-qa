@@ -83,7 +83,7 @@ class BertTrainer(object):
                 self.optimizer.zero_grad()
                 self.iterations += 1
 
-        wandb.log({f'group-{group_idx}-{epoch}':self.tr_loss},step = epoch )
+        wandb.log({f'group-{group_idx}':self.tr_loss},step = epoch )
         print(self.tr_loss)
         
 

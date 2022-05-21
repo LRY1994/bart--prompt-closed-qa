@@ -9,8 +9,9 @@ ADAPTER_NAMES="entity_predict"
 ADAPTER_TYPE="ParallelConfig" #PrefixTuningConfig HoulsbyConfig PfeifferConfig ParallelConfig
 ADAPTER_TYPE2="PfeifferConfig"
 ADAPTER_TYPE3="HoulsbyConfig"
-PARTITION=30
+PARTITION=20
 TRIPLE_PER_RELATION=5000
+EPOCH=5
 
 python src/relation_prompt/run_pretrain.py \
 --model $MODEL \
@@ -27,7 +28,7 @@ python src/relation_prompt/run_pretrain.py \
 --max_seq_length 128 \
 --batch_size 64  \
 --lr 1e-04 \
---epochs 10 \
+--epochs $EPOCH \
 
 python src/relation_prompt/run_pretrain.py \
 --model $MODEL \
@@ -44,7 +45,7 @@ python src/relation_prompt/run_pretrain.py \
 --max_seq_length 128 \
 --batch_size 64  \
 --lr 1e-04 \
---epochs 10 \
+--epochs $EPOCH \
 
 python src/relation_prompt/run_pretrain.py \
 --model $MODEL \
@@ -61,5 +62,5 @@ python src/relation_prompt/run_pretrain.py \
 --max_seq_length 128 \
 --batch_size 64  \
 --lr 1e-04 \
---epochs 10 \
+--epochs $EPOCH \
 #bash src/relation_prompt/run_pretrain.sh
