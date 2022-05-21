@@ -31,6 +31,8 @@ class BertEvaluator(object):
         self.split = split
         self.logger = logger
         self.device = args.device
+        self.model.eval()
+
        
         if (split == 'dev'):   self.eval_examples = self.processor.get_dev_examples()
         if (split == 'train'): self.eval_examples = self.processor.get_train_examples()
@@ -128,10 +130,15 @@ class BertEvaluator(object):
          
             with torch.no_grad():
                 outputs = self.model(**inputs)
-                loss = outputs[0]
-                eval_loss += loss.mean().item()
+
+            loss = outputs[0]
+            if self.args.n_gpu > 1:
+                loss = loss.mean()
+            if self.args.gradient_accumulation_steps > 1:
+                loss = loss / self.args.gradient_accumulation_steps
+            eval_loss += loss.item()
             nb_eval_steps += 1
-        
+            
         
 
                 # outputs = self.model.model(**inputs)
@@ -139,14 +146,7 @@ class BertEvaluator(object):
         
                 # loss_fct = nn.CrossEntropyLoss(reduction="sum", ignore_index=self.model.config.pad_token_id)
                 # loss = loss_fct(lm_logits.view(-1, self.model.config.vocab_size),decoder_input_ids.view(-1))
-                           
-
-            # if self.args.n_gpu > 1:
-            #     loss = loss.mean()
-            # if self.args.gradient_accumulation_steps > 1:
-            #     loss = loss / self.args.gradient_accumulation_steps
-            # eval_loss += loss      
-            # nb_eval_steps += 1
+               
 
         # loss       
         eval_loss = eval_loss / nb_eval_steps
@@ -180,7 +180,8 @@ class BertEvaluator(object):
             suffix: The supplementary suffix of prediction results name.
         Returns:
             preds: A python list of the generated sequences.
-        """  # noqa: ignore flake8"     
+        """  # noqa: ignore flake8" 
+        self.model.eval()    
         pred_data = self.eval_examples 
         to_predict = [d.input_text.replace('\n','') for d in pred_data]
         target_predict = [d.target_text.replace('\n','') for d in pred_data]#groundtruth
@@ -247,13 +248,6 @@ class BertEvaluator(object):
             for i in range(len(outputs)):
                 prediction = outputs[i].strip()       
                 groudtruth = target_predict[i].strip().split('\t')
-                # groudtruth = [normalize_answer(g) for g in groudtruth]
-                
-                
-                # if prediction in groudtruth:
-                #     print(prediction +'\n'+str(groudtruth))
-                #     correct_num += 1
-                #     flag = True
                 flag = False   
                 if get_exact_match(prediction, groudtruth):
                     print(prediction+'\n'+str(groudtruth))

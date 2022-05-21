@@ -30,7 +30,7 @@ class BertTrainer(object):
         self.loss = losses.NTXentLoss(temperature=0.04)
 
     @timeit
-    def train_epoch(self, train_dataloader):
+    def train_epoch(self, train_dataloader,epoch,group_idx):
         self.tr_loss = 0
         for step, batch in enumerate(tqdm(train_dataloader, desc="Training")):
             self.total_step += 1
@@ -82,8 +82,10 @@ class BertTrainer(object):
                 self.scheduler.step()
                 self.optimizer.zero_grad()
                 self.iterations += 1
+
+        wandb.log({f'group-{group_idx}-{epoch}':self.tr_loss},step = epoch )
         print(self.tr_loss)
-        wandb.log({"loss": loss})
+        
 
     def train_subgraph_cache_tokens(self, group_idx):
         tokenized_features = self.processor.load_and_cache_tokenized_features(
@@ -173,7 +175,7 @@ class BertTrainer(object):
 
         print(f"Start Training on group_idx {group_idx}")
         for epoch in tqdm(range(self.args.epochs), file=sys.stdout, desc="Epoch"):
-            self.train_epoch(train_dataloader)
+            self.train_epoch(train_dataloader,epoch, group_idx )
             self.save_model(epoch=epoch, group_idx=group_idx)
 
     def train(self, tokenized_features, group_idx):
@@ -184,7 +186,7 @@ class BertTrainer(object):
                 sampler=train_sampler,
                 batch_size=self.args.batch_size,
             )
-            self.train_epoch(train_dataloader)
+            self.train_epoch(train_dataloader,epoch,group_idx)
             self.save_model(epoch=epoch, group_idx=group_idx)
 
     def save_model(self, epoch=None, step=None, group_idx=None):

@@ -1,12 +1,13 @@
 DATASET="WebQuestion"
-MODEL_DIR="checkpoints/bart-base_20220516_013128_ParallelConfig_adapter"
+# MODEL_DIR="checkpoints/bart-base_20220516_013128_ParallelConfig_adapter"
+MODEL_DIR="checkpoints/bart-base_20220521_122004_PfeifferConfig_adapter"
 DATA_DIR="/home/simon/datasets/WebQuestion/splitted/"
 BASE_MODEL="facebook/bart-base"
 T=1
 LR=4e-5
-TRAIN_MODE="base"
+TRAIN_MODE="fusion"
 OUTPUT_DIR="output"
-TRAIN_BATCH_SIZE=16
+TRAIN_BATCH_SIZE=32
 
 python src/evaluation/eval_question.py \
 --dataset $DATASET \
@@ -21,7 +22,7 @@ python src/evaluation/eval_question.py \
 --max_input_length 64 \
 --max_output_length 64 \
 --learning_rate $LR   \
---pretrain_epoch 10 \
+--pretrain_epoch 5 \
 --epochs 30 \
 --repeat_runs 1 \
 --temperature $T \

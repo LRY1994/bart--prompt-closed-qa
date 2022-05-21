@@ -152,9 +152,10 @@ class BioAsqProcessor(BertProcessor):
             examples.append(
                 InputExample(input_text=input_text, target_text=target_text)
             )
-        self.logger.info(
-            f"Get {len(examples)} examples of {self.NAME} datasets for {set_type} set"
-        )
+        if self.logger:
+             self.logger.info(
+                f"Get {len(examples)} examples of {self.NAME} datasets for {set_type} set"
+            )
         return examples
 
 

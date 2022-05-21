@@ -8,7 +8,6 @@ class RelPrompt(BartAdapterModel):
     def __init__(self,config, rel=None, devices=None):
        
         super().__init__(config)
-        # self.model = AutoModelForCausalLM.from_pretrained(model)
         self.prompt_length = len(rel)
         self.devices = devices
         self.word_embeddings  = nn.Embedding(config.vocab_size, config.d_model, config.pad_token_id)

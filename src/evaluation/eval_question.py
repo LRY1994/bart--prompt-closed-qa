@@ -278,7 +278,7 @@ if __name__ == "__main__":
     dev_acc_list = []
     test_acc_list = []
     seed_list = []
-    # args.batch_size = args.batch_size // args.gradient_accumulation_steps
+    args.batch_size = args.batch_size // args.gradient_accumulation_steps
     args.device = device
     args.n_gpu = n_gpu
     
