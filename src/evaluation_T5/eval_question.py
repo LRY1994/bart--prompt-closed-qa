@@ -15,15 +15,15 @@ import torch
 from transformers import (
     AdapterFusionConfig,
     AutoConfig, 
-    BartConfig,
-    BartForConditionalGeneration,
-    BartTokenizer,
+    BartConfig,T5Config,
+    BartForConditionalGeneration,T5ForConditionalGeneration ,
+    BartTokenizer,T5Tokenizer 
 )
 
 import wandb
 from utils.bert_evaluator import BertEvaluator
 from utils.bert_trainer import BertTrainer
-from utils.bioasq_processor import BioAsqProcessor
+from utils.data_processor import DataProcessor
 from utils.common_utils import print_args_as_table
 
 
@@ -130,19 +130,6 @@ def evaluate_split(model, processor, tokenizer, args, logger,split="dev"):
 
 def get_tf_flag(args):
     from_tf = False
-    # if (
-    #     (
-    #         ("BioRedditBERT" in args.model)
-    #         or ("BioBERT" in args.model)
-    #         or ("SapBERT" in args.model)
-    #     )
-    #     and "step_" not in args.model
-    #     and "epoch_" not in args.model
-    # ):
-    #     from_tf = True
-
-    # if ("SapBERT" in args.model) and ("original" in args.model):
-    #     from_tf = False
     return from_tf
 
 
@@ -286,8 +273,9 @@ if __name__ == "__main__":
     wandb.config.update(args)
     print_args_as_table(args)
 
-    processor = BioAsqProcessor(args.data_dir, logger)   
-    tokenizer = BartTokenizer.from_pretrained(args.base_model)
+    model_name = args.base_model
+    processor = DataProcessor(args.data_dir, logger )   
+    tokenizer = T5Tokenizer.from_pretrained(model_name, truncate=True)
 
     for i in range(args.repeat_runs):
         logger.info( f'**Start the {i}th/{args.repeat_runs}(args.repeat_runs) training.****' )
@@ -301,16 +289,16 @@ if __name__ == "__main__":
         torch.manual_seed(seed)
         args.best_model_dir = f"src/temp/model_{seed}/"
         os.makedirs(args.best_model_dir, exist_ok=True)
-        basemodel = BartForConditionalGeneration.from_pretrained(args.base_model)
+
+        config = T5Config.from_pretrained(args.base_model)
+        basemodel = T5ForConditionalGeneration.from_pretrained(model_name, config=config)     
         basemodel.init_weights()
+               
         if n_gpu > 0:
             torch.cuda.manual_seed_all(seed)
         if args.train_mode == "fusion":
-            # args.base_model will be a folder of pre-trained models over partitions
             config, model = load_fusion_adapter_model(args, basemodel)
-        elif args.train_mode == "base":
-            # use base bart model
-            config = BartConfig.from_pretrained(args.base_model) #AutoConfig.from_pretrained(args.base_model)
+        elif args.train_mode == "base":                
             model = basemodel
 
         

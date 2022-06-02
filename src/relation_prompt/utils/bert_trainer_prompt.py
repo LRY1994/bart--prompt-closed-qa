@@ -49,13 +49,13 @@ class BertTrainer(object):
             
             if self.args.amp:
                 with autocast():
-                    sequence_output1 = self.model(**inputs)[0]#last_hidden_state 
-                    sequence_output2 = self.model(**labels)[0]#last_hidden_state 
+                    sequence_output1 = self.model(**inputs).last_hidden_state 
+                    sequence_output2 = self.model(**labels).last_hidden_state 
             else:
-                sequence_output1 = self.model(**inputs)[0]  
-                sequence_output2 = self.model(**labels)[0] 
-            query_embed1 = sequence_output1[:, 0]#[CLS] head entity  + relation prompt + [MASK] 
-            query_embed2 = sequence_output2[:, 0]# [CLS]tail entity 
+                sequence_output1 = self.model(**inputs).last_hidden_state
+                sequence_output2 = self.model(**labels).last_hidden_state
+            query_embed1 = sequence_output1[:, -1]#head entity  + relation prompt + [MASK] [CLS] 
+            query_embed2 = sequence_output2[:, -1]# tail entity [CLS]
             query_embed = torch.cat([query_embed1, query_embed2], dim=0)
             # query_embed : [2 * batch_size, hidden]
 

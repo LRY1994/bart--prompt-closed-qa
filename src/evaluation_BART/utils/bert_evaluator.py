@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from multiprocessing import Pool, cpu_count
 # from .abstract_processor import convert_examples_to_features
-from utils.bioasq_processor import create_dataloader
+from utils.data_processor import create_dataloader
 import logging
 import re
 import string

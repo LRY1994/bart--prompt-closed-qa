@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from transformers import BartForConditionalGeneration,BartConfig,BartTokenizer,BartAdapterModel
 
-class RelPrompt(BartAdapterModel):
+class RelPromptBart(BartAdapterModel):
     
     def __init__(self,config, rel=None, devices=None):
        
@@ -23,18 +23,21 @@ class RelPrompt(BartAdapterModel):
     ):
         
         # word_embeddings 会自动加上一个终止符，
-        ent_embedding = self.word_embeddings(input_ids)  # (batch ,sequence_length , hidden_size)
+        ent_embedding = self.word_embeddings(input_ids) # (batch ,sequence_length , hidden_size)
 
         if mode == 'query':
+            # ent_embedding.shape[0]  batch
+            # ent_embedding.shape[2]  hidden_size
             prompt_embed = self.prompt.expand(ent_embedding.shape[0], self.prompt_length, ent_embedding.shape[2]).to(self.devices)# (batch , prompt_length , hidden_size)
             inputs_embeds = torch.cat([ent_embedding[:,:-2,:], prompt_embed, ent_embedding[:,-2:,:]],dim=1)  # (batch , ent_h + prompt_length + （mask+END） , hidden_size) 
         else:
             inputs_embeds = ent_embedding # (batch ,sequence_length , hidden_size)
-      
+        # print(inputs_embeds.shape)
         # print(self.model) #BartModel
-        outputs = self.model.encoder(
+        outputs = super().forward(
             input_ids=None,
-            inputs_embeds=inputs_embeds
+            inputs_embeds=inputs_embeds,
+            decoder_inputs_embeds=inputs_embeds
         )
         # print( outputs[0].shape)#last_hidden_state (batch_size, sequence_length, hidden_size))
         return outputs

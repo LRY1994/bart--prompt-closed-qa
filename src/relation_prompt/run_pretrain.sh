@@ -9,6 +9,8 @@ ADAPTER_NAMES="entity_predict"
 ADAPTER_TYPE="ParallelConfig" #PrefixTuningConfig HoulsbyConfig PfeifferConfig ParallelConfig
 ADAPTER_TYPE2="PfeifferConfig"
 ADAPTER_TYPE3="HoulsbyConfig"
+# ADAPTER_TYPE3="PrefixTuningConfig"
+
 PARTITION=20
 TRIPLE_PER_RELATION=5000
 EPOCH=5
@@ -25,42 +27,42 @@ python src/relation_prompt/run_pretrain.py \
 --use_adapter \
 --cuda \
 --num_workers 16 \
---max_seq_length 128 \
---batch_size 64  \
+--max_seq_length 32 \
+--batch_size 8  \
 --lr 1e-04 \
 --epochs $EPOCH \
 
-python src/relation_prompt/run_pretrain.py \
---model $MODEL \
---tokenizer $TOKENIZER \
---input_dir $INPUT_DIR \
---output_dir $OUTPUT_DIR \
---n_partition $PARTITION \
---triple_per_relation $TRIPLE_PER_RELATION \
---adapter_names  $ADAPTER_NAMES \
---adapter_type $ADAPTER_TYPE2 \
---use_adapter \
---cuda \
---num_workers 16 \
---max_seq_length 128 \
---batch_size 64  \
---lr 1e-04 \
---epochs $EPOCH \
+# python src/relation_prompt/run_pretrain.py \
+# --model $MODEL \
+# --tokenizer $TOKENIZER \
+# --input_dir $INPUT_DIR \
+# --output_dir $OUTPUT_DIR \
+# --n_partition $PARTITION \
+# --triple_per_relation $TRIPLE_PER_RELATION \
+# --adapter_names  $ADAPTER_NAMES \
+# --adapter_type $ADAPTER_TYPE2 \
+# --use_adapter \
+# --cuda \
+# --num_workers 16 \
+# --max_seq_length 128 \
+# --batch_size 64  \
+# --lr 1e-04 \
+# --epochs $EPOCH \
 
-python src/relation_prompt/run_pretrain.py \
---model $MODEL \
---tokenizer $TOKENIZER \
---input_dir $INPUT_DIR \
---output_dir $OUTPUT_DIR \
---n_partition $PARTITION \
---triple_per_relation $TRIPLE_PER_RELATION \
---adapter_names  $ADAPTER_NAMES \
---adapter_type $ADAPTER_TYPE3 \
---use_adapter \
---cuda \
---num_workers 16 \
---max_seq_length 128 \
---batch_size 64  \
---lr 1e-04 \
---epochs $EPOCH \
+# python src/relation_prompt/run_pretrain.py \
+# --model $MODEL \
+# --tokenizer $TOKENIZER \
+# --input_dir $INPUT_DIR \
+# --output_dir $OUTPUT_DIR \
+# --n_partition $PARTITION \
+# --triple_per_relation $TRIPLE_PER_RELATION \
+# --adapter_names  $ADAPTER_NAMES \
+# --adapter_type $ADAPTER_TYPE3 \
+# --use_adapter \
+# --cuda \
+# --num_workers 16 \
+# --max_seq_length 128 \
+# --batch_size 64  \
+# --lr 1e-04 \
+# --epochs $EPOCH \
 #bash src/relation_prompt/run_pretrain.sh

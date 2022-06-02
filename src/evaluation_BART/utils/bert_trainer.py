@@ -10,7 +10,7 @@ from tqdm.auto import tqdm, trange
 import pandas as pd
 from torch import Tensor, nn
 # from .abstract_processor import convert_examples_to_features
-from utils.bioasq_processor import create_dataloader
+from utils.data_processor import create_dataloader
 from .bert_evaluator import BertEvaluator
 from transformers.models.bart.modeling_bart import shift_tokens_right
 from transformers import (
@@ -241,17 +241,21 @@ class BertTrainer(object):
                 self.unimproved_iters = 0
                 self.best_dev_acc = dev_accuracy
 
-                test_evaluator = BertEvaluator(
-                    self.model, self.processor, self.tokenizer, self.args, logger,split="test"
-                )
-                test_accuracy= test_evaluator.get_accuracy()
-                logger.info(f"test_accuracy :{test_accuracy}") 
-                self.wandb.log(
-                    {'Epoch Test accuracy':test_accuracy},
-                    step = epoch )
+                # test_evaluator = BertEvaluator(
+                #     self.model, self.processor, self.tokenizer, self.args, logger,split="test"
+                # )
+                # test_accuracy= test_evaluator.get_accuracy()
+                # logger.info(f"test_accuracy :{test_accuracy}") 
+                # self.wandb.log(
+                #     {'Epoch Test accuracy':test_accuracy},
+                #     step = epoch )
 
                 logger.info(f"save model to {self.args.best_model_dir}model.bin")         
-                torch.save(self.model, self.args.best_model_dir + "model.bin")
+                # torch.save(self.model, self.args.best_model_dir + "model.bin")
+                self.model.save_pretrained(self.args.best_model_dir)
+                self.model.save_adapter_fusion(self.args.best_model_dir, args.fusion_adapter_rename)
+                self.model.save_all_adapters(self.args.best_model_dir)
+
             else:
                 self.unimproved_iters += 1
                 if self.unimproved_iters >= self.args.patience:

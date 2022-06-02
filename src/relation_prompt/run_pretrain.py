@@ -1,3 +1,4 @@
+from ast import If
 import os
 import random
 import time
@@ -18,7 +19,7 @@ from transformers import (
     AutoConfig, 
     AutoTokenizer,
     BartTokenizer,
-    BartConfig ,
+    BartConfig ,T5Config,
     AutoModelForCausalLM
 )
 # from transformers.adapters import PrefixTuningConfig
@@ -27,10 +28,11 @@ import wandb
 from utils.bert_trainer_prompt import BertTrainer
 from utils.common import print_args_as_table
 from utils.kg_processor import  KGProcessor_prompt
-from model2 import RelPrompt
+from model_BART import RelPromptBart
+from model_T5 import RelPromptT5
 
-# 1. Start a W&B run
-wandb.init(project="Entity prediction with partition")
+
+
 
 
 from argparse import ArgumentParser
@@ -163,10 +165,12 @@ def get_args():
 def init_model(args, relid=None):
     print(f"Initializing model from {args.model}")
 
-    config = BartConfig.from_pretrained(args.model)
-    
-    model = RelPrompt.from_pretrained(  args.model , config=config, rel=relid, devices=args.device )  
-   
+    # if args.model.index('bart') :
+    config = BartConfig.from_pretrained(args.model)   
+    model = RelPromptBart.from_pretrained(  args.model , config=config, rel=relid, devices=args.device )  
+    # if args.model.index('t5') :
+    #     config = T5Config.from_pretrained(args.model)   
+    #     model = RelPromptT5.from_pretrained(  args.model , config=config, rel=relid, devices=args.device )
   
     if args.use_adapter:
         # PfeifferConfig :places an adapter layer only after the feed-forward block in each Transformer layer.
@@ -211,15 +215,11 @@ def init_model(args, relid=None):
     )
     return model, optimizer
 
-# def build_rel(path):
-#     triples = os.path.join(path, 'wikidata5m_transductive_train.txt')
-#     rel_dict = 
-#     for triple in triples:
-
-
 if __name__ == "__main__":
     # Set default configuration in args.py
     args = get_args()
+    # 1. Start a W&B run
+    wandb.init(project=f"Entity prediction with partition-{args.adapter_type}")
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")  
     n_gpu = torch.cuda.device_count() if args.cuda else 0
 
