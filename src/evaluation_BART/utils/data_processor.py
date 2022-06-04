@@ -44,7 +44,7 @@ def read_data_source_target(file_name_source, file_name_target):
         raise ValueError(
             "The length of the source file should be equal to target file"
         )
-    length = 10 #len(source)
+    length = len(source)
     source_target_pair = [[ source[i], target[i]] for i in range(length)] # "" for "prefix" used in t5_util.py
     data_df = pd.DataFrame(source_target_pair, columns=[ "input_text", "target_text"])
     return data_df

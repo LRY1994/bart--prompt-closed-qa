@@ -1,3 +1,4 @@
+from cmath import log
 from email.mime import base
 import os
 import random
@@ -316,8 +317,7 @@ if __name__ == "__main__":
             torch.cuda.manual_seed_all(seed)
         if args.train_mode == "fusion":
             fusion_adapter_rename, model = load_fusion_adapter_model(args, model)
-
-        args.fusion_adapter_rename = fusion_adapter_rename.join(',')
+            args.fusion_adapter_rename = fusion_adapter_rename
         
 
         model.to(device)
@@ -334,9 +334,10 @@ if __name__ == "__main__":
         logger.info("***Evaluating Model(modal is set)***")
         logger.info(f"load model from {args.best_model_dir}model.bin")
         # model = torch.load(args.best_model_dir + "model.bin")
-        model = BartForConditionalGeneration.from_pretrained(args.best_model_dir)
-        model.load_adapter_fusion(fusion_adapter_rename) 
-        model.set_active_adapters(fusion_adapter_rename) 
+        model = BartForConditionalGeneration.from_pretrained(args.best_model_dir) 
+        if args.train_mode == "fusion":   
+            model.set_active_adapters(fusion_adapter_rename) 
+            model.load_adapter_fusion(args.best_model_dir,set_active=True)       
         model.to(device)
         
      
@@ -345,16 +346,19 @@ if __name__ == "__main__":
         train_result = evaluate_split(model, processor, tokenizer, args, logger,split="train")
         train_result["run_num"] = i
         wandb.log(train_result)  # Record Dev Result
+        logger.info(train_result)
         train_acc_list.append(train_result["train_accuracy"])
 
         dev_result = evaluate_split(model, processor, tokenizer, args, logger,split="dev")
         dev_result["run_num"] = i
         wandb.log(dev_result)  # Record Dev Result
+        logger.info(dev_result)
         dev_acc_list.append(dev_result["dev_accuracy"])
 
         test_result = evaluate_split(model, processor, tokenizer, args, logger,split="test")
         test_result["run_num"] = i
         wandb.log(test_result)  # Record Testing Result
+        logger.info(test_result)
         test_acc_list.append(test_result["test_accuracy"])
 
         # if (
@@ -366,7 +370,6 @@ if __name__ == "__main__":
         #     logger.info(f"correct_ratio of {test_result['test_correct_ratio']}.")
 
     logger.info(f"***{args.repeat_runs} training is finished****")
-    
 
     result = {}
     result["seed_list"] = seed_list

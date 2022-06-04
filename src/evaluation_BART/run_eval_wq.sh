@@ -12,7 +12,7 @@ TRAIN_MODE2="base"
 OUTPUT_DIR="output"
 TRAIN_BATCH_SIZE=16
 PRE_EPOCH=4
-EPOCH=1
+EPOCH=20
 
 #base
 python src/evaluation_BART/eval_question.py \
@@ -37,68 +37,68 @@ python src/evaluation_BART/eval_question.py \
 --cuda \
 
 # #fusion
-# python src/evaluation_BART/eval_question.py \
-# --dataset $DATASET \
-# --train_mode $TRAIN_MODE \
-# --model_dir $MODEL_DIR \
-# --data_dir $DATA_DIR  \
-# --base_model $BASE_MODEL \
-# --tokenizer $BASE_MODEL  \
-# --adapter_num 20 \
-# --batch_size $TRAIN_BATCH_SIZE \
-# --eval_batch_size $TRAIN_BATCH_SIZE \
-# --max_input_length 64 \
-# --max_output_length 64 \
-# --learning_rate $LR   \
-# --pretrain_epoch $PRE_EPOCH \
-# --epochs $EPOCH \
-# --repeat_runs 1 \
-# --temperature $T \
-# --output_dir $OUTPUT_DIR \
-# --gradient_accumulation_steps 4 \
-# --cuda \
+python src/evaluation_BART/eval_question.py \
+--dataset $DATASET \
+--train_mode $TRAIN_MODE \
+--model_dir $MODEL_DIR \
+--data_dir $DATA_DIR  \
+--base_model $BASE_MODEL \
+--tokenizer $BASE_MODEL  \
+--adapter_num 20 \
+--batch_size $TRAIN_BATCH_SIZE \
+--eval_batch_size $TRAIN_BATCH_SIZE \
+--max_input_length 64 \
+--max_output_length 64 \
+--learning_rate $LR   \
+--pretrain_epoch $PRE_EPOCH \
+--epochs $EPOCH \
+--repeat_runs 1 \
+--temperature $T \
+--output_dir $OUTPUT_DIR \
+--gradient_accumulation_steps 4 \
+--cuda \
 
-# python src/evaluation_BART/eval_question.py \
-# --dataset $DATASET \
-# --train_mode $TRAIN_MODE \
-# --model_dir $MODEL_DIR2 \
-# --data_dir $DATA_DIR  \
-# --base_model $BASE_MODEL \
-# --tokenizer $BASE_MODEL  \
-# --adapter_num 20 \
-# --batch_size $TRAIN_BATCH_SIZE \
-# --eval_batch_size $TRAIN_BATCH_SIZE \
-# --max_input_length 64 \
-# --max_output_length 64 \
-# --learning_rate $LR   \
-# --pretrain_epoch $PRE_EPOCH \
-# --epochs $EPOCH \
-# --repeat_runs 1 \
-# --temperature $T \
-# --output_dir $OUTPUT_DIR \
-# --gradient_accumulation_steps 4 \
-# --cuda \
+python src/evaluation_BART/eval_question.py \
+--dataset $DATASET \
+--train_mode $TRAIN_MODE \
+--model_dir $MODEL_DIR2 \
+--data_dir $DATA_DIR  \
+--base_model $BASE_MODEL \
+--tokenizer $BASE_MODEL  \
+--adapter_num 20 \
+--batch_size $TRAIN_BATCH_SIZE \
+--eval_batch_size $TRAIN_BATCH_SIZE \
+--max_input_length 64 \
+--max_output_length 64 \
+--learning_rate $LR   \
+--pretrain_epoch $PRE_EPOCH \
+--epochs $EPOCH \
+--repeat_runs 1 \
+--temperature $T \
+--output_dir $OUTPUT_DIR \
+--gradient_accumulation_steps 4 \
+--cuda \
 
-# python src/evaluation_BART/eval_question.py \
-# --dataset $DATASET \
-# --train_mode $TRAIN_MODE \
-# --model_dir $MODEL_DIR3 \
-# --data_dir $DATA_DIR  \
-# --base_model $BASE_MODEL \
-# --tokenizer $BASE_MODEL  \
-# --adapter_num 20 \
-# --batch_size $TRAIN_BATCH_SIZE \
-# --eval_batch_size $TRAIN_BATCH_SIZE \
-# --max_input_length 64 \
-# --max_output_length 64 \
-# --learning_rate $LR   \
-# --pretrain_epoch $PRE_EPOCH \
-# --epochs $EPOCH \
-# --repeat_runs 1 \
-# --temperature $T \
-# --output_dir $OUTPUT_DIR \
-# --gradient_accumulation_steps 4 \
-# --cuda \
+python src/evaluation_BART/eval_question.py \
+--dataset $DATASET \
+--train_mode $TRAIN_MODE \
+--model_dir $MODEL_DIR3 \
+--data_dir $DATA_DIR  \
+--base_model $BASE_MODEL \
+--tokenizer $BASE_MODEL  \
+--adapter_num 20 \
+--batch_size $TRAIN_BATCH_SIZE \
+--eval_batch_size $TRAIN_BATCH_SIZE \
+--max_input_length 64 \
+--max_output_length 64 \
+--learning_rate $LR   \
+--pretrain_epoch $PRE_EPOCH \
+--epochs $EPOCH \
+--repeat_runs 1 \
+--temperature $T \
+--output_dir $OUTPUT_DIR \
+--gradient_accumulation_steps 4 \
+--cuda \
 
 # #bash src/evaluation_BART/run_eval_wq.sh
 # #sudo wg-quick up tw

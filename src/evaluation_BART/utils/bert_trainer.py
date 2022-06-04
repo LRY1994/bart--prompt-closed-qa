@@ -241,20 +241,21 @@ class BertTrainer(object):
                 self.unimproved_iters = 0
                 self.best_dev_acc = dev_accuracy
 
-                # test_evaluator = BertEvaluator(
-                #     self.model, self.processor, self.tokenizer, self.args, logger,split="test"
-                # )
-                # test_accuracy= test_evaluator.get_accuracy()
-                # logger.info(f"test_accuracy :{test_accuracy}") 
-                # self.wandb.log(
-                #     {'Epoch Test accuracy':test_accuracy},
-                #     step = epoch )
+                test_evaluator = BertEvaluator(
+                    self.model, self.processor, self.tokenizer, self.args, logger,split="test"
+                )
+                test_accuracy= test_evaluator.get_accuracy()
+                logger.info(f"test_accuracy :{test_accuracy}") 
+                self.wandb.log(
+                    {'Epoch Test accuracy':test_accuracy},
+                    step = epoch )
 
                 logger.info(f"save model to {self.args.best_model_dir}model.bin")         
                 # torch.save(self.model, self.args.best_model_dir + "model.bin")
                 self.model.save_pretrained(self.args.best_model_dir)
-                self.model.save_adapter_fusion(self.args.best_model_dir, args.fusion_adapter_rename)
-                self.model.save_all_adapters(self.args.best_model_dir)
+                if self.args.train_mode == "fusion": 
+                    self.model.save_adapter_fusion(self.args.best_model_dir, self.args.fusion_adapter_rename)
+                    self.model.save_all_adapters(self.args.best_model_dir)
 
             else:
                 self.unimproved_iters += 1
