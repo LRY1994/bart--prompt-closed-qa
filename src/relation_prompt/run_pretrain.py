@@ -15,6 +15,8 @@ from transformers import (
     PfeifferConfig,
     ParallelConfig,
     PrefixTuningConfig,
+    CompacterConfig,
+    MAMConfig,
     AdapterType,
     AutoConfig, 
     AutoTokenizer,
@@ -173,16 +175,18 @@ def init_model(args, relid=None):
     #     model = RelPromptT5.from_pretrained(  args.model , config=config, rel=relid, devices=args.device )
   
     if args.use_adapter:
-        # PfeifferConfig :places an adapter layer only after the feed-forward block in each Transformer layer.
-        # adapter_config = PfeifferConfig(           
-        #     # non_linearity=adapter_args.adapter_non_linearity,
-        #     reduction_factor=args.CRate,  # adapter_args.adapter_reduction_factor, #{2,16,64}
-        #     leave_out=[]           
-        # )
+        
         if args.adapter_type =='PrefixTuningConfig' : adapter_config= PrefixTuningConfig(flat=False, prefix_length=30)
         if args.adapter_type =='HoulsbyConfig' : adapter_config= HoulsbyConfig()
-        if args.adapter_type =='PfeifferConfig' : adapter_config= PfeifferConfig()
+        if args.adapter_type =='PfeifferConfig' : 
+            adapter_config= PfeifferConfig(
+                # non_linearity= adapter_args.adapter_non_linearity,
+                reduction_factor=args.CRate,  # adapter_args.adapter_reduction_factor, #{2,16,64}
+                leave_out=[] 
+            )
         if args.adapter_type =='ParallelConfig' : adapter_config= ParallelConfig()
+        if args.adapter_type =='CompacterConfig': adapter_config= CompacterConfig()
+        if args.adapter_type=='MAMConfig':adapter_config = MAMConfig()
 
         model.add_adapter( args.adapter_names, config=adapter_config )
         model.train_adapter( args.adapter_names)

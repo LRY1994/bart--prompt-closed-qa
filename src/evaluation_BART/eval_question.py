@@ -237,6 +237,7 @@ def load_fusion_adapter_model(args,base_model):
     base_model.add_adapter_fusion(fusion_adapter_rename,"dynamic")
     base_model.set_active_adapters(fusion_adapter_rename)
     base_model.train_adapter_fusion([fusion_adapter_rename])
+    base_model.freeze_model(False)
     # config = AutoConfig.from_pretrained(
     #     os.path.join(adapter_dir, "adapter_config.json")
     # )
@@ -345,19 +346,19 @@ if __name__ == "__main__":
 
         train_result = evaluate_split(model, processor, tokenizer, args, logger,split="train")
         train_result["run_num"] = i
-        wandb.log(train_result)  # Record Dev Result
+        # wandb.log(train_result)  # Record Dev Result
         logger.info(train_result)
         train_acc_list.append(train_result["train_accuracy"])
 
         dev_result = evaluate_split(model, processor, tokenizer, args, logger,split="dev")
         dev_result["run_num"] = i
-        wandb.log(dev_result)  # Record Dev Result
+        # wandb.log(dev_result)  # Record Dev Result
         logger.info(dev_result)
         dev_acc_list.append(dev_result["dev_accuracy"])
 
         test_result = evaluate_split(model, processor, tokenizer, args, logger,split="test")
         test_result["run_num"] = i
-        wandb.log(test_result)  # Record Testing Result
+        # wandb.log(test_result)  # Record Testing Result
         logger.info(test_result)
         test_acc_list.append(test_result["test_accuracy"])
 
