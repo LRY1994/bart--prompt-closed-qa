@@ -110,48 +110,49 @@ class BertEvaluator(object):
 
         Utility function to be used by the eval_model() method. Not intended to be used directly.
         """
-        eval_dataloader = create_dataloader(
-            self.eval_examples, 
-            self.tokenizer, 
-            self.args.batch_size, 
-            self.args.max_input_length, 
-            self.args.max_output_length, 
-            isTraining=False)
+        # eval_dataloader = create_dataloader(
+        #     self.eval_examples, 
+        #     self.tokenizer, 
+        #     self.args.batch_size, 
+        #     self.args.max_input_length, 
+        #     self.args.max_output_length, 
+        #     isTraining=False)
 
-        self.model.eval()
+        # self.model.eval()
 
-        eval_loss = 0
-        nb_eval_steps = 0
-        results = {}
+        # eval_loss = 0
+        # nb_eval_steps = 0
+        # results = {}
         
-        for batch in tqdm( eval_dataloader, desc="Evaluating", disable=silent): 
+        # for batch in tqdm( eval_dataloader, desc="Evaluating", disable=silent): 
 
-            inputs = self._get_inputs_dict( batch ) 
+        #     inputs = self._get_inputs_dict( batch ) 
          
-            with torch.no_grad():
-                outputs = self.model(**inputs)
+        #     with torch.no_grad():
+        #         outputs = self.model(**inputs)
 
-            loss = outputs[0]
-            if self.args.n_gpu > 1:
-                loss = loss.mean()
-            if self.args.gradient_accumulation_steps > 1:
-                loss = loss / self.args.gradient_accumulation_steps
-            eval_loss += loss.item()
-            nb_eval_steps += 1
+        #     loss = outputs[0]
+        #     if self.args.n_gpu > 1:
+        #         loss = loss.mean()
+        #     if self.args.gradient_accumulation_steps > 1:
+        #         loss = loss / self.args.gradient_accumulation_steps
+        #     eval_loss += loss.item()
+        #     nb_eval_steps += 1
             
         
 
-                # outputs = self.model.model(**inputs)
-                # lm_logits = F.linear(outputs[0], self.model.model.shared.weight, bias=self.model.final_logits_bias)
+        #         # outputs = self.model.model(**inputs)
+        #         # lm_logits = F.linear(outputs[0], self.model.model.shared.weight, bias=self.model.final_logits_bias)
         
-                # loss_fct = nn.CrossEntropyLoss(reduction="sum", ignore_index=self.model.config.pad_token_id)
-                # loss = loss_fct(lm_logits.view(-1, self.model.config.vocab_size),decoder_input_ids.view(-1))
+        #         # loss_fct = nn.CrossEntropyLoss(reduction="sum", ignore_index=self.model.config.pad_token_id)
+        #         # loss = loss_fct(lm_logits.view(-1, self.model.config.vocab_size),decoder_input_ids.view(-1))
                
 
-        # loss       
-        eval_loss = eval_loss / nb_eval_steps
-        results["eval_loss"] = eval_loss  
+        # # loss       
+        # eval_loss = eval_loss / nb_eval_steps
+        # results["eval_loss"] = eval_loss  
         # accuracy
+        results = {}
         result , preds = self.inference()
         results.update(result)# {correct_num, correct_ratio}
         target_text = [d.target_text.replace('\n','') for d in self.eval_examples]

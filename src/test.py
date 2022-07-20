@@ -1,16 +1,39 @@
 
 from transformers import BartTokenizer, BartModel
 import torch
+import os
+tri_file = os.path.join('/home/simon/wikidata5m', "wikidata5m_transductive_train.txt")#'/home/simon/桌面/closed-book-prompt-qa/src/test.txt'# 
+triple_list = {}
+f = open(tri_file, "r")
+for line in f.readlines():
+    h, r, t = line.strip().split("\t")   
+    if r in triple_list:
+        triple_list[r].append((h, t))
+    else:
+        triple_list[r] = [(h, t)]
+# print(triple_list.items())#dict_items([('P31', [('Q29387131', 'Q5'), ('Q14946683', 'Q5')]), ('P1412', [('Q326660', 'Q652')]), ('P57', [('Q7339549', 'Q1365729')]), ('P27', [('Q554335', 'Q29999'), ('Q4221140', 'Q399')]), ('P54', [('Q20641639', 'Q80955')]), ('P131', [('Q6925786', 'Q488653')]), ('P19', [('Q4890993', 'Q931116')]), ('P156', [('Q3198638', 'Q2859200')]), ('P161', [('Q24905727', 'Q88139')])])
+import heapq
+top_n = 20#825
+# print(list(triple_list.items())[0][1])
+n_top_rel = list(heapq.nlargest(top_n, list(triple_list.items()), key=lambda s: len(s[1])))
+top_rel = [id for id, tlist in n_top_rel]
+tri_per_rel =  [len(tlist) for id, tlist in n_top_rel][-1]
+print(tri_per_rel)
+with open('/home/simon/桌面/closed-book-prompt-qa/output/relation_triple.txt', "w", encoding="utf8") as writer:      
+  for id, tlist in n_top_rel:
+    writer.write(str(id)+'\t'+str(len(tlist))+'\n')
 
-tokenizer = BartTokenizer.from_pretrained("facebook/bart-base")
-model = BartModel.from_pretrained("facebook/bart-base")
+        
 
-inputs = tokenizer("Hello, my dog is cute", return_tensors="pt")
-outputs = model(**inputs)
-print(inputs)
+# tokenizer = BartTokenizer.from_pretrained("facebook/bart-base")
+# model = BartModel.from_pretrained("facebook/bart-base")
 
-last_hidden_states = outputs.last_hidden_state
-print(last_hidden_states.shape)#torch.Size([1, 8, 768])
+# inputs = tokenizer("Hello, my dog is cute", return_tensors="pt")
+# outputs = model(**inputs)
+# print(inputs)
+
+# last_hidden_states = outputs.last_hidden_state
+# print(last_hidden_states.shape)#torch.Size([1, 8, 768])
 
 '''
 BartModel(

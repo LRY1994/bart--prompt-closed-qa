@@ -61,42 +61,13 @@ class KGProcessor_prompt(BertProcessor):
         ## if bi_direction is False, only predict the tail node
         super(KGProcessor_prompt, self).__init__()
 
-    def partition_graph(self, partition_n):
-        print("Start partition_graph")
-        h_list = []
-        t_list = []
-        r_list = []
-        with open(self.tri_file, "r") as f:
-            print(f"loading triples {f.readline()}")
-            for line in tqdm(f.readlines()):
-                h, t, r = line.split("\t")
-                h_list.append(int(h.strip()))
-                t_list.append(int(t.strip()))
-                r_list.append(int(r.strip()))
-        triple_df = pd.DataFrame(
-            {
-                "head_id": h_list,
-                "relation_id": r_list,
-                "tail_id": t_list,
-            }
-        )
-        edge_list = []
-        for i, row in triple_df.iterrows():
-            edge_list.append([row.head_id, row.tail_id])
-        edge_list_ar = np.array(edge_list)
-        num_nodes = self.ent_total
-        adj = _construct_adj(edge_list_ar, num_nodes)
-        idx_nodes = [i for i in range(self.ent_total)]
-        part_adj, parts = partition_graph(adj, idx_nodes, partition_n)
-        with open(self.partition_file, "w") as f:
-            for node_list in parts:
-                f.write("\t".join([str(i) for i in node_list]) + "\n")
 
     def sample_triple(self, top_n):
         import heapq
-        top_rel = list(heapq.nlargest(top_n, list(self.triple_list.items()), key=lambda s: len(s)))
-        top_rel = [id for id, num in top_rel]
-        return top_rel    
+        n_top_rel = list(heapq.nlargest(top_n, list(self.triple_list.items()), key=lambda s: len(s[1])))       
+        top_rel = [id for id, tlist in n_top_rel]
+        tri_per_rel =  [len(tlist) for id, tlist in n_top_rel][-1]#the least
+        return top_rel , tri_per_rel
 
 
     def load_data(self, sub_set):
@@ -109,7 +80,7 @@ class KGProcessor_prompt(BertProcessor):
 
             for ent in f.readlines():
                 self.ent_total += 1
-                self.id2ent[ent.split("\t")[0].strip()] = ent.split("\t")[1]
+                self.id2ent[ent.split("\t")[0].strip()] = ent.split("\t")[1]#'</s>'.join(ent.split("\t")[1:]).strip()#ent.split("\t")[1]
             print(
                 f"Loading entities (subset mode:{sub_set}) ent_total:{self.ent_total} len(self.id2ent): {len(self.id2ent)}"
             )
@@ -119,9 +90,22 @@ class KGProcessor_prompt(BertProcessor):
             # print("Read Relation File")
             # self.rel_total = (int)(f.readline())  # num of total relations
             for rel in f.readlines():
+                # arr = rel.split("\t")[1:]
+                # result = arr[0].strip()
+                # for index in range(1,len(arr)):
+                #     tmp = result + ' </s> '+ arr[index].strip()
+                #     if len(tmp.split(' ')) < 65: result = tmp
+                #     else : break
+                # self.id2rel[rel.split("\t")[0].strip()] = result
                 self.id2rel[rel.split("\t")[0].strip()] = rel.split("\t")[1]
             print(f"{len(self.id2rel)} relations loaded.")
+        
+        # print(self.id2rel['P1001'])
+        # print(self.id2ent['Q47551'])
 
+          
+
+        ## Read triple File
         f = open(self.tri_file, "r")
         # triples_total = (int)(f.readline())
 
@@ -142,10 +126,12 @@ class KGProcessor_prompt(BertProcessor):
                 count += 1
         f.close()
 
-        self.top_rel = self.sample_triple(self.n_partition)
+
+        # top relation
+        self.top_rel , tri_per_rel = self.sample_triple(self.n_partition)
         # print([self.id2rel[r] for r in self.top_rel])
         self.triple_list = {r: self.triple_list[r] for r in self.top_rel}
-        tri_per_rel = self.triple_per_relation ###
+        
         import random
         self.triple_list = {k: random.sample(v, tri_per_rel)  if len(v) > tri_per_rel else v  for (k, v) in self.triple_list.items()}
 

@@ -22,7 +22,7 @@ from transformers import (
     AutoTokenizer,
     BartTokenizer,
     BartConfig ,T5Config,
-    AutoModelForCausalLM
+    ConfigUnion
 )
 # from transformers.adapters import PrefixTuningConfig
 import wandb
@@ -31,8 +31,10 @@ from utils.bert_trainer_prompt import BertTrainer
 from utils.common import print_args_as_table
 from utils.kg_processor import  KGProcessor_prompt
 from model_BART import RelPromptBart
-from model_T5 import RelPromptT5
+# from model_bart import RelPromptBart
 
+from model_T5 import RelPromptT5
+from torchsummary import summary
 
 
 
@@ -155,9 +157,8 @@ def get_args():
         default='ParallelConfig',
         help="adapter_type",
     )
+    parser.add_argument("--use_prompt", action="store_true", help="use prompt?")
 
-
-  
 
     args = parser.parse_args()
     return args
@@ -169,14 +170,18 @@ def init_model(args, relid=None):
 
     # if args.model.index('bart') :
     config = BartConfig.from_pretrained(args.model)   
-    model = RelPromptBart.from_pretrained(  args.model , config=config, rel=relid, devices=args.device )  
+    model = RelPromptBart.from_pretrained(  args.model , config=config, rel=relid, devices=args.device ,use_prompt=args.use_prompt)  
+    model.to(device)
+    
+    # print(model)
+
     # if args.model.index('t5') :
     #     config = T5Config.from_pretrained(args.model)   
     #     model = RelPromptT5.from_pretrained(  args.model , config=config, rel=relid, devices=args.device )
   
     if args.use_adapter:
         
-        if args.adapter_type =='PrefixTuningConfig' : adapter_config= PrefixTuningConfig(flat=False, prefix_length=30)
+        if args.adapter_type =='PrefixTuningConfig' : adapter_config= PrefixTuningConfig(flat=True, prefix_length=200)
         if args.adapter_type =='HoulsbyConfig' : adapter_config= HoulsbyConfig()
         if args.adapter_type =='PfeifferConfig' : 
             adapter_config= PfeifferConfig(
@@ -186,15 +191,22 @@ def init_model(args, relid=None):
             )
         if args.adapter_type =='ParallelConfig' : adapter_config= ParallelConfig()
         if args.adapter_type =='CompacterConfig': adapter_config= CompacterConfig()
-        if args.adapter_type=='MAMConfig':adapter_config = MAMConfig()
+        if args.adapter_type=='MAMConfig':
+            adapter_config = ConfigUnion(
+                PrefixTuningConfig(flat=True, prefix_length=200),
+                ParallelConfig(),
+            )
 
         model.add_adapter( args.adapter_names, config=adapter_config )
         model.train_adapter( args.adapter_names)
-    model.to(device)
+    
     if args.n_gpu > 1:
         model = torch.nn.DataParallel(model)
 
     param_optimizer = list(model.named_parameters())
+    # for n, p in param_optimizer:
+    #     print(n)
+
     no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
         {
@@ -217,6 +229,8 @@ def init_model(args, relid=None):
         weight_decay=0.01,
         correct_bias=False,
     )
+
+    model.to(device)
     return model, optimizer
 
 if __name__ == "__main__":
@@ -235,7 +249,8 @@ if __name__ == "__main__":
     args.model_str = f"{model_str}_{args.adapter_type}"
     if args.use_adapter:
         args.model_str += "_adapter"
-    args.save_path = args.output_dir + '/' + args.model_str
+    
+    args.save_path = args.output_dir + '/' + args.model_str +'_use_prompt_'+ str(args.use_prompt)#+ timestamp_str
     os.makedirs(args.save_path, exist_ok=True)
     
 
@@ -287,18 +302,15 @@ if __name__ == "__main__":
   
     
     rel_names = list(map(data_processor.id2rel.get, data_processor.top_rel))
-    print(rel_names)#['instance of', 'languages spoken, written or signed', 'director', 'country of citizenship', 'member of sports team', 'located in the administrative territorial entity', 'place of birth', 'followed by', 'cast member', 'exhibition history']
+    # print(rel_names)#['instance of', 'languages spoken, written or signed', 'director', 'country of citizenship', 'member of sports team', 'located in the administrative territorial entity', 'place of birth', 'followed by', 'cast member', 'exhibition history']
     # relations = tokenizer(rel_names, add_special_tokens=False)['input_ids']
     relations = tokenizer(rel_names, add_special_tokens=False, add_prefix_space=True)['input_ids']
    
-    print(relations[0]) #[48768, 9]
-    
-    # model, optimizer = init_model(args, relations[0])
+    # print(relations[0]) #[48768, 9]
+
     for group_idx in range(args.n_partition):
-        # if group_idx != 0 and args.non_sequential:
-        #     model, optimizer = init_model(args, relations[group_idx])
-        # if group_idx != 0 and args.non_sequential:
         model, optimizer = init_model(args, relations[group_idx])
+        model.to(device)
         wandb.watch(model)
         trainer = BertTrainer(model, optimizer, data_processor, tokenizer, args)
         

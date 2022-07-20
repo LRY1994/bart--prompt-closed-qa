@@ -54,7 +54,7 @@ class BertTrainer(object):
             else:
                 sequence_output1 = self.model(**inputs).last_hidden_state
                 sequence_output2 = self.model(**labels).last_hidden_state
-            query_embed1 = sequence_output1[:, -1]#head entity  + relation prompt + [MASK] [CLS] 
+            query_embed1 = sequence_output1[:, -1]# head entity  + relation prompt + [MASK] [CLS] 
             query_embed2 = sequence_output2[:, -1]# tail entity [CLS]
             query_embed = torch.cat([query_embed1, query_embed2], dim=0)
             # query_embed : [2 * batch_size, hidden]
@@ -71,6 +71,7 @@ class BertTrainer(object):
                 loss = loss / self.args.gradient_accumulation_steps
 
             loss.backward()
+
             if (self.total_step % self.args.save_step == 0) and (
                 self.total_step < 20000
             ):
@@ -85,6 +86,7 @@ class BertTrainer(object):
 
         wandb.log({f'group-{group_idx}':self.tr_loss},step = epoch )
         print(self.tr_loss)
+        
         
 
     def train_subgraph_cache_tokens(self, group_idx):
@@ -107,7 +109,7 @@ class BertTrainer(object):
         print(f"Start Training on group_idx {group_idx}")
         self.train(tokenized_features, group_idx)
     
-    # train_subgraph->train_epoch->train
+    # train_subgraph->train_epoch
     def train_subgraph(self, group_idx):
         '''
         InputExample(
@@ -174,12 +176,20 @@ class BertTrainer(object):
         )
 
         print(f"Start Training on group_idx {group_idx}")
+        path = os.path.join('output', "prompt.txt")
+        with open(path, "a", encoding="utf8", errors="ignore") as writer:
+            writer.write(f"group_{group_idx}_init")
+            writer.write(str(self.model.prompt))
         for epoch in tqdm(range(self.args.epochs), file=sys.stdout, desc="Epoch"):
             self.train_epoch(train_dataloader,epoch, group_idx )
             self.save_model(epoch=epoch, group_idx=group_idx)
+            with open(path, "a", encoding="utf8", errors="ignore") as writer:
+                    writer.write(f"group_{group_idx}_{self.args.epochs-1}")
+                    writer.write(str(self.model.prompt))
+            
 
     def train(self, tokenized_features, group_idx):
-        for epoch in tqdm(range(self.args.epochs), file=sys.stdout, desc="Epoch"):
+        for epoch in tqdm(range(self.args.epochs), file=sys.stdout, desc="Epoch"):           
             train_sampler = RandomSampler(tokenized_features)
             train_dataloader = DataLoader(
                 tokenized_features,
@@ -188,6 +198,11 @@ class BertTrainer(object):
             )
             self.train_epoch(train_dataloader,epoch,group_idx)
             self.save_model(epoch=epoch, group_idx=group_idx)
+          
+
+                          
+        
+
 
     def save_model(self, epoch=None, step=None, group_idx=None):
         if epoch is not None and group_idx is not None:
@@ -197,6 +212,8 @@ class BertTrainer(object):
 
         print(f"saving model to {save_path}")
         os.makedirs(save_path, exist_ok=True)
+
+
         if self.args.n_gpu > 1:
             self.model.module.save_adapter(save_path, self.args.adapter_names)
         else:

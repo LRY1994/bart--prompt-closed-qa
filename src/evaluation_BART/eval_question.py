@@ -252,7 +252,7 @@ if __name__ == "__main__":
     print(args)
     
 
-    wandb.init(project=args.dataset)
+    # wandb.init(project=args.dataset)
     #### Start writing logs
 
     log_filename = "log.txt"
@@ -287,6 +287,7 @@ if __name__ == "__main__":
     args.n_gpu = n_gpu
     
     # Record config on wandb
+    wandb.init(project=args.dataset)
     wandb.config.update(args)
     print_args_as_table(args)
 
@@ -310,9 +311,7 @@ if __name__ == "__main__":
 
         config = BartConfig.from_pretrained(args.base_model)
         model = BartForConditionalGeneration.from_pretrained(args.base_model)  
-            
-        # model.init_weights()
-        
+       
         
         if n_gpu > 0:
             torch.cuda.manual_seed_all(seed)
@@ -324,6 +323,14 @@ if __name__ == "__main__":
         model.to(device)
         if n_gpu > 1:
             model = torch.nn.DataParallel(model)
+
+        #print model's state_dict
+        # print('Model.state_dict:')
+        # for param_tensor in model.state_dict():
+        #     #打印 key value字典
+        #     logger.info(param_tensor)
+
+
        
 
         logger.info('***Training Model***')
@@ -346,19 +353,19 @@ if __name__ == "__main__":
 
         train_result = evaluate_split(model, processor, tokenizer, args, logger,split="train")
         train_result["run_num"] = i
-        # wandb.log(train_result)  # Record Dev Result
+        wandb.log(train_result)  # Record Dev Result
         logger.info(train_result)
         train_acc_list.append(train_result["train_accuracy"])
 
         dev_result = evaluate_split(model, processor, tokenizer, args, logger,split="dev")
         dev_result["run_num"] = i
-        # wandb.log(dev_result)  # Record Dev Result
+        wandb.log(dev_result)  # Record Dev Result
         logger.info(dev_result)
         dev_acc_list.append(dev_result["dev_accuracy"])
 
         test_result = evaluate_split(model, processor, tokenizer, args, logger,split="test")
         test_result["run_num"] = i
-        # wandb.log(test_result)  # Record Testing Result
+        wandb.log(test_result)  # Record Testing Result
         logger.info(test_result)
         test_acc_list.append(test_result["test_accuracy"])
 
