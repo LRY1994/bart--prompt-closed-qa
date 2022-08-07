@@ -6,10 +6,12 @@ from transformers import BartForConditionalGeneration,BartConfig,BartTokenizer,B
 
 class RelPromptBart(BartAdapterModel):
     
-    def __init__(self,config, rel=None, devices=None, use_prompt=True):
+    def __init__(self,config, rel=None, devices=None, use_prompt=True,prompt_length=64):
        
         super().__init__(config)
-        self.prompt_length = len(rel)
+        self.prompt_length = len(rel)#
+        print('prompt_length:')
+        print(prompt_length)
         self.devices = devices
         self.word_embeddings  = nn.Embedding(config.vocab_size, config.d_model, config.pad_token_id)
         if use_prompt :

@@ -15,7 +15,7 @@ T=1
 #base
 python src/evaluation_BART/eval_question.py \
 --dataset $DATASET \
---train_mode  $TRAIN_MODE_BASE\
+--train_mode  $TRAIN_MODE_BASE \
 --model_dir $MODEL_DIR \
 --data_dir $DATA_DIR  \
 --base_model $BASE_MODEL \

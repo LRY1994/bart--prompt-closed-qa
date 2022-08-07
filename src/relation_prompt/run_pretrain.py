@@ -170,7 +170,14 @@ def init_model(args, relid=None):
 
     # if args.model.index('bart') :
     config = BartConfig.from_pretrained(args.model)   
-    model = RelPromptBart.from_pretrained(  args.model , config=config, rel=relid, devices=args.device ,use_prompt=args.use_prompt)  
+    model = RelPromptBart.from_pretrained(  
+        args.model , 
+        config=config, 
+        rel=relid, 
+        devices=args.device ,
+        use_prompt=args.use_prompt,
+        prompt_length = args.max_seq_length
+        )  
     model.to(device)
     
     # print(model)
@@ -304,7 +311,13 @@ if __name__ == "__main__":
     rel_names = list(map(data_processor.id2rel.get, data_processor.top_rel))
     # print(rel_names)#['instance of', 'languages spoken, written or signed', 'director', 'country of citizenship', 'member of sports team', 'located in the administrative territorial entity', 'place of birth', 'followed by', 'cast member', 'exhibition history']
     # relations = tokenizer(rel_names, add_special_tokens=False)['input_ids']
-    relations = tokenizer(rel_names, add_special_tokens=False, add_prefix_space=True)['input_ids']
+    relations = tokenizer(
+        rel_names, 
+        add_special_tokens=False, 
+        add_prefix_space=True,
+        padding="max_length",  
+        max_length=args.max_seq_length,
+        )['input_ids']
    
     # print(relations[0]) #[48768, 9]
 

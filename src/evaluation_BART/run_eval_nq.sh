@@ -13,10 +13,32 @@ PRE_EPOCH=0
 EPOCH=20
 T=1
 #base
+# python src/evaluation_BART/eval_question.py \
+# --dataset $DATASET \
+# --train_mode  $TRAIN_MODE_BASE \
+# --model_dir $MODEL_DIR_TRUE \
+# --data_dir $DATA_DIR  \
+# --base_model $BASE_MODEL \
+# --tokenizer $BASE_MODEL  \
+# --adapter_num $PARTITION \
+# --batch_size $TRAIN_BATCH_SIZE \
+# --eval_batch_size $TRAIN_BATCH_SIZE \
+# --max_input_length 64 \
+# --max_output_length 64 \
+# --learning_rate $LR   \
+# --pretrain_epoch $PRE_EPOCH \
+# --epochs $EPOCH \
+# --repeat_runs 1 \
+# --temperature $T \
+# --output_dir $OUTPUT_DIR \
+# --gradient_accumulation_steps 4 \
+# --cuda \
+
+# FUSION NO PROMPT pretrain_epoch 
 python src/evaluation_BART/eval_question.py \
 --dataset $DATASET \
---train_mode  $TRAIN_MODE_BASE\
---model_dir $MODEL_DIR \
+--train_mode $TRAIN_MODE_FUSION \
+--model_dir $MODEL_DIR_FALSE \
 --data_dir $DATA_DIR  \
 --base_model $BASE_MODEL \
 --tokenizer $BASE_MODEL  \
@@ -35,34 +57,11 @@ python src/evaluation_BART/eval_question.py \
 --cuda \
 
 
-# FUSION NO PROMPT pretrain_epoch 
-python src/evaluation_BART/eval_question.py \
---dataset $DATASET \
---train_mode $TRAIN_MODE_FUSION \
---model_dir $MODEL_DIR_FALSE \
---data_dir $DATA_DIR  \
---base_model $BASE_MODEL \
---tokenizer $BASE_MODEL  \
---adapter_num $PARTITION \
---batch_size $TRAIN_BATCH_SIZE \
---eval_batch_size $TRAIN_BATCH_SIZE \
---max_input_length 64 \
---max_output_length 64 \
---learning_rate $LR   \
---pretrain_epoch 0 \
---epochs $EPOCH \
---repeat_runs 1 \
---temperature $T \
---output_dir $OUTPUT_DIR \
---gradient_accumulation_steps 4 \
---cuda \
-
-
 # FUSION PROMPT pretrain_epoch 
 python src/evaluation_BART/eval_question.py \
 --dataset $DATASET \
 --train_mode $TRAIN_MODE_FUSION \
---model_dir $MODEL_DIR_TRUE \
+--model_dir $MODEL_DIR \
 --data_dir $DATA_DIR  \
 --base_model $BASE_MODEL \
 --tokenizer $BASE_MODEL  \
@@ -72,7 +71,7 @@ python src/evaluation_BART/eval_question.py \
 --max_input_length 64 \
 --max_output_length 64 \
 --learning_rate $LR   \
---pretrain_epoch 0 \
+--pretrain_epoch $PRE_EPOCH \
 --epochs $EPOCH \
 --repeat_runs 1 \
 --temperature $T \
