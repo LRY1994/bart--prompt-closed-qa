@@ -6,19 +6,19 @@ from transformers import BartForConditionalGeneration,BartConfig,BartTokenizer,B
 
 class RelPromptBart(BartAdapterModel):
     
-    def __init__(self,config, rel=None, devices=None, use_prompt=True,prompt_length=64):
+    def __init__(self,config, rel=None, devices=None, use_prompt=True,prompt_length=20):
        
         super().__init__(config)
-        self.prompt_length = len(rel)#
+        self.prompt_length = prompt_length #len(rel)#
         print('prompt_length:')
         print(prompt_length)
         self.devices = devices
         self.word_embeddings  = nn.Embedding(config.vocab_size, config.d_model, config.pad_token_id)
         if use_prompt :
-            self.prompt = nn.Parameter( self.word_embeddings(torch.tensor(rel)).clone() )# initilize with token
+            self.prompt = nn.Parameter( self.word_embeddings(torch.tensor(rel)).clone().detach()  )# initilize with token
             self.prompt.requires_grad = True
         else :
-            self.prompt = torch.tensor(self.word_embeddings(torch.tensor(rel)).clone() )
+            self.prompt = torch.tensor(self.word_embeddings(torch.tensor(rel)).clone().detach() )
         
         self.apply(self._init_weights)
 

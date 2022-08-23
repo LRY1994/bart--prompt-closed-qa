@@ -6,16 +6,18 @@ INPUT_DIR="/home/simon/wikidata5m"
 OUTPUT_DIR="checkpoints"
 DATASET_NAME="wikidata5m"
 ADAPTER_NAMES="entity_predict"
-ADAPTER_TYPE="PfeifferConfig" 
+# ADAPTER_TYPE="PfeifferConfig" 
 # ADAPTER_TYPE2="ParallelConfig"
-# ADAPTER_TYPE4="PrefixTuningConfig"
+ADAPTER_TYPE="PrefixTuningConfig"
+PREFIX_LENGTH=100
+PROMPT_LENGTH=200
 # ADAPTER_TYPE5="CompacterConfig"
 
 # ADAPTER_TYPE3="HoulsbyConfig"
 # ADAPTER_TYPE6="MAMConfig"
 
 
-PARTITION=20
+PARTITION=10
 TRIPLE_PER_RELATION=5000
 EPOCH=5
 LR=1e-04
@@ -48,6 +50,8 @@ python src/relation_prompt/run_pretrain.py \
 --triple_per_relation $TRIPLE_PER_RELATION \
 --adapter_names  $ADAPTER_NAMES \
 --adapter_type $ADAPTER_TYPE \
+--prefix_length $PREFIX_LENGTH \
+--prompt_lenth $PROMPT_LENGTH \
 --use_adapter \
 --cuda \
 --num_workers 16 \
@@ -55,7 +59,8 @@ python src/relation_prompt/run_pretrain.py \
 --batch_size 16 \
 --lr $LR \
 --epochs $EPOCH \
-# --use_prompt \
+
+
 
 python src/relation_prompt/run_pretrain.py \
 --model $MODEL \
@@ -66,6 +71,8 @@ python src/relation_prompt/run_pretrain.py \
 --triple_per_relation $TRIPLE_PER_RELATION \
 --adapter_names  $ADAPTER_NAMES \
 --adapter_type $ADAPTER_TYPE \
+--prefix_length $PREFIX_LENGTH \
+--prompt_lenth $PROMPT_LENGTH \
 --use_adapter \
 --cuda \
 --num_workers 16 \

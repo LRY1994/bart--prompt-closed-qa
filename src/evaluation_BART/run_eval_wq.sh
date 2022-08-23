@@ -1,7 +1,7 @@
 DATASET="WebQuestion"
 DATA_DIR="/home/simon/datasets/WebQuestion/splitted/"
-MODEL_DIR_TRUE="checkpoints/bart-base_PfeifferConfig_adapter_use_prompt_True"
-MODEL_DIR_FALSE="checkpoints/bart-base_PfeifferConfig_adapter_use_prompt_False"
+MODEL_DIR_TRUE="checkpoints/bart-base_PrefixTuningConfig_adapter_use_prompt_True"
+MODEL_DIR_FALSE="checkpoints/bart-base_PrefixTuningConfig_adapter_use_prompt_False"
 BASE_MODEL="facebook/bart-base"
 T=1
 LR=1e-5

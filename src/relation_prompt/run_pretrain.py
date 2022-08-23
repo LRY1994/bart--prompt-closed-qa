@@ -157,6 +157,12 @@ def get_args():
         default='ParallelConfig',
         help="adapter_type",
     )
+    parser.add_argument(
+        "--prefix_length",
+        type=int,
+        default=100,
+        help="prefix_length",
+    )
     parser.add_argument("--use_prompt", action="store_true", help="use prompt?")
 
 
@@ -176,7 +182,7 @@ def init_model(args, relid=None):
         rel=relid, 
         devices=args.device ,
         use_prompt=args.use_prompt,
-        prompt_length = args.max_seq_length
+        prompt_length = args.prompt_length
         )  
     model.to(device)
     
@@ -188,7 +194,7 @@ def init_model(args, relid=None):
   
     if args.use_adapter:
         
-        if args.adapter_type =='PrefixTuningConfig' : adapter_config= PrefixTuningConfig(flat=True, prefix_length=200)
+        if args.adapter_type =='PrefixTuningConfig' : adapter_config= PrefixTuningConfig(flat=True, prefix_length=args.prefix_length)
         if args.adapter_type =='HoulsbyConfig' : adapter_config= HoulsbyConfig()
         if args.adapter_type =='PfeifferConfig' : 
             adapter_config= PfeifferConfig(
@@ -200,7 +206,7 @@ def init_model(args, relid=None):
         if args.adapter_type =='CompacterConfig': adapter_config= CompacterConfig()
         if args.adapter_type=='MAMConfig':
             adapter_config = ConfigUnion(
-                PrefixTuningConfig(flat=True, prefix_length=200),
+                PrefixTuningConfig(flat=True, prefix_length=args.prefix_length),
                 ParallelConfig(),
             )
 
@@ -316,7 +322,7 @@ if __name__ == "__main__":
         add_special_tokens=False, 
         add_prefix_space=True,
         padding="max_length",  
-        max_length=args.max_seq_length,
+        max_length=args.prompt_length,
         )['input_ids']
    
     # print(relations[0]) #[48768, 9]

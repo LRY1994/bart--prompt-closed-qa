@@ -66,7 +66,8 @@ class KGProcessor_prompt(BertProcessor):
         import heapq
         n_top_rel = list(heapq.nlargest(top_n, list(self.triple_list.items()), key=lambda s: len(s[1])))       
         top_rel = [id for id, tlist in n_top_rel]
-        tri_per_rel =  [len(tlist) for id, tlist in n_top_rel][-1]#the least
+        # tri_per_rel =  [len(tlist) for id, tlist in n_top_rel][-1]#the least
+        tri_per_rel =  self.triple_per_relation
         return top_rel , tri_per_rel
 
 
@@ -156,7 +157,7 @@ class KGProcessor_prompt(BertProcessor):
                 InputExample(
                     guid=None,
                     text_e=text_h + '<mask>',
-                    text_r=text_r,
+                    text_r='<mask>' + text_r,
                     label=text_t,
                 )
             )
